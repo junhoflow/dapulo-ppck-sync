@@ -4,11 +4,21 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `947dcba0cf320b95b782339c8d52c41d71699b94`, successful [Pages run 41346420215](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41346420215).
+Final deployed commit: `924d3d617d680d0041ddf0bbbe4d83b425ab1134`, successful [Pages run 41346974553](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41346974553).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest actual app inside the mobile panel
+## Latest English navigation and presentation appearance
+
+User requested ENG work inside the right frame, remove the initial navy fullscreen band, use black split margins, and put the actual app icon before Dapulo. Expanded only the existing public-home rule to exact /, /en and /en/; the app nonce rule and API/ERP are unchanged. /en200 now allows PPCK; /en/308 redirects to /en with the same frame policy. Still two free rules. No Dapulo app assets/Worker/DB deployment.
+
+Audience normal/native-fullscreen/iPad CSS-large backgrounds are black. Initial native fullscreen removes its24px inset and screen border/corners. Video remains uncropped with object-fit contain; aspect-ratio letterboxing is black. Header uses the exact live-manifest PNG (/dapulo-icon-192.png?v=20260902-rounded), published as app-icon.png, SHA256 d5700536954de18962d224ed159c285db9a589f45f43ed274441cfbe0f6fbe44. Pages artifact explicitly stages this PNG and validates it exists.
+
+Actual deployed present9 tests/english-presentation.mjs PASSED Chrome + WebKit: icon fully decoded192px, published PNG hash matches, audience background black, initial fullscreen video x0/y0/1180×820 matches viewport with padding0 and radius0, fullscreen split black, actual ENG→English→KOR→Korean→ENG round trip, real English page scrolling (Chrome trusted touch260; WebKit wheel600), English hero Grow my coral opens real /app, and1024×768/844×390/390×844 layouts have no horizontal overflow. No header stripping/site substitution; MQTT disconnected and local synthetic ending only. Evidence /private/tmp/ppck-present9-deployed; initial fullscreen and English split screenshots inspected.
+
+Predeploy failures were test selector errors: visible ENG/KOR are accessible English/한국어, then a footer Open app link was incorrectly scoped to header. Preserved /private/tmp/ppck-present9-predeploy and /private/tmp/ppck-present9-predeploy-locator-fixed; neither called all-pass. Corrected selectors from actual HTML to language accessible names and hero Grow my coral. Final actual deployed run passed. Syntax/protocol3/3/diff checks passed. Physical devices remain unverified by the agent. Actual present9 iPad-specific compatibility test also PASSED: simulated iPad Chrome exits native to black large view with touch260; simulated iPad WebKit exits native to black large view with wheel650; Android Chrome retains black native fullscreen with touch259. Replay/Close/reopen still work. Evidence /private/tmp/ppck-present9-ipad-compat. These simulate detection/desktop engine behavior, not physical tablets.
+
+## Previous actual app inside the mobile panel
 
 User requested the actual /app continue inside the same right panel and separately approved the concrete Cloudflare exception. Added app-only rule `7cba8f1a7a6b426f9d767e9ae99001da`, preserving per-response nonce and all original script/worker directives while allowing only https://junhoflow.github.io in frame-ancestors. Root rule unchanged. /erp retains SAMEORIGIN; API health remains401. No Dapulo app assets/Worker/DB deployment. See APP_EMBED_APPROVAL.md and DAPULO_APP_EMBED_RULE.json.
 

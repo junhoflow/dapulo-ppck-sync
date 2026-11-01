@@ -4,7 +4,7 @@ const {chromium,webkit,expect}=await import(process.env.PLAYWRIGHT_MODULE||'@pla
 const base=process.env.PPCK_URL||'https://junhoflow.github.io/dapulo-ppck-sync/?v=ipad7';
 const out=process.env.PPCK_EVIDENCE||`/private/tmp/ppck-ipad-view-${Date.now()}`;await mkdir(out,{recursive:true});
 const result={base,scope:'iPad detection simulated on desktop browser engines; real homepage and native input; MQTT isolated; synthetic local end event',cases:[]};
-const allowed=new Set(['index.html','style.css','audience.mjs','homepage-panel.mjs','config.mjs','protocol.mjs','connection.mjs','vendor/mqtt.min.js','first-frame.jpg','27233.mp4']);
+const allowed=new Set(['index.html','style.css','audience.mjs','homepage-panel.mjs','config.mjs','protocol.mjs','connection.mjs','vendor/mqtt.min.js','first-frame.jpg','27233.mp4','app-icon.png']);
 for(const[engine,name,ipad]of[[chromium,'chrome-ipad-branch-touch',true],[webkit,'webkit-ipad-branch-wheel',true],[chromium,'chrome-android-native-fullscreen-touch',false]]){
  let browser,context,page;const record={name};
  try{
@@ -26,7 +26,7 @@ for(const[engine,name,ipad]of[[chromium,'chrome-ipad-branch-touch',true],[webkit
   if(engine===chromium){const cdp=await context.newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=12;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-i*22}]});await page.evaluate(()=>new Promise(requestAnimationFrame));}await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
   else{await page.mouse.move(x,y);await page.mouse.wheel(0,650);}
   await expect.poll(()=>frame.evaluate(()=>scrollY),{timeout:5000}).toBeGreaterThan(100);
-  record.scrollY=await frame.evaluate(()=>scrollY);record.nativeFullscreen=await page.evaluate(()=>document.fullscreenElement?.id||null);record.expanded=await page.locator('#presentation').evaluate(e=>e.classList.contains('is-expanded'));
+  record.scrollY=await frame.evaluate(()=>scrollY);record.nativeFullscreen=await page.evaluate(()=>document.fullscreenElement?.id||null);record.expanded=await page.locator('#presentation').evaluate(e=>e.classList.contains('is-expanded'));record.background=await page.locator('#presentation').evaluate(e=>getComputedStyle(e).backgroundColor);assert.equal(record.background,'rgb(0, 0, 0)');
   await page.screenshot({path:`${out}/${name}.png`,fullPage:true});
   await page.locator('#replay').click();await expect(page.locator('#status')).toHaveText('Replaying on this screen');assert.ok(await frame.evaluate(()=>scrollY)>100);
   if(ipad){assert.equal(await page.evaluate(()=>document.fullscreenElement),null);await page.getByRole('button',{name:'Exit large view'}).click();await expect(page.locator('#presentation')).not.toHaveClass(/is-expanded/);await page.getByRole('button',{name:'Large view',exact:true}).click();await expect(page.locator('#presentation')).toHaveClass(/is-expanded/);assert.equal(await page.evaluate(()=>document.fullscreenElement),null);}
