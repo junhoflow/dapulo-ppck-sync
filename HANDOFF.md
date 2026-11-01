@@ -2,7 +2,17 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
-## Latest follow-up — video ending reveals the real mobile homepage
+## Latest fix — tablet finger scrolling
+
+User reported that the right homepage could not be scrolled with a tablet finger. The earlier tests used `window.scrollTo`, which verified scroll state but NOT real native gestures. Do not use them as evidence of physical touch input.
+
+- First actual-input run: /private/tmp/ppck-scroll-input-before. Chrome wheel timed out at scrollY 0; WebKit wheel reached 650; Chrome mobile CDP swipe reached 259. A separate single-page Chrome diagnostic reached 650 with normal input, so no claim that the physical tablet defect was deterministically reproduced. The initial failure and traces are preserved.
+- Compatibility fix: remove retained transform/grid transition around the live frame, remove redundant inert toggling, show and lay out frame before assigning its URL, initialize scrolling=yes in markup, and add a dedicated overflow/touch pan-y scrolling wrapper with explicit iframe height. Existing end/split/replay behavior and the real homepage URL are preserved.
+- No Dapulo production setting or source change in this fix. The previously approved exact-root embed rule is unchanged.
+- New tests/homepage-scroll-input.mjs uses actual mouse wheel plus CDP touchStart/touchMove/touchEnd (Chrome mobile emulation, including fullscreen); it does not fake scrolling with window.scrollTo. Browser focus is set explicitly for each isolated context. Physical iPad/Android is still not available to this agent.
+- Syntax, protocol 3/3 and diff checks passed. Deployment and actual-input recheck are next.
+
+## Previous follow-up — video ending reveals the real mobile homepage
 
 - Requested split UI implemented: video shifts left at first end, right mobile-width iframe opens dapulo.com, personal replay leaves iframe mounted/scroll intact. Phone portrait stacks the homepage below video. Combined fullscreen now includes both panels; native-video-only Safari fallback returns inline at end so HTML panel remains reachable.
 - homepage-panel.mjs owns lazy load/show/hide. Exact live homepage URL only, no proxy/header stripping. sandbox blocks top-level navigation and device permissions; Open site link remains available.
