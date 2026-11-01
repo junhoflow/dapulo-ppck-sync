@@ -2,7 +2,17 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
-## Current status
+## Latest requested behavior — 2026-11-02
+
+User requested the video itself remain visible throughout: first frame paused on entry, play without a 3-2-1 screen, final video frame held at the end. This supersedes the earlier waiting/countdown/thank-you flow below.
+
+- Implemented: first-frame JPEG poster extracted from the actual clip; no video overlays; automatic ready for this silent muted clip; small below-video Enable playback fallback only if a browser blocks playback; pause keeps its frame; reset returns to frame zero; end holds the final decoded video frame at 11.999 seconds.
+- Presenter button is now 전체 재생. Visible countdown removed; common-clock delivery buffer shortened from 3 seconds to 600 ms.
+- Local Chrome + WebKit `tests/video-frames.mjs` passed: first-frame paused, no audience click, no overlays/countdown, start/pause/restart/end/reset. First/final frames checked as non-black decoded 1920×1080 images, screenshots visually inspected. Start observed in ~1.3 seconds including test polling/network; final currentTime 11.999 and paused on both engines.
+- JS syntax checks, protocol tests 3/3 and diff check passed. Deployment and deployed affected-flow QA pending at this checkpoint.
+- Evidence: /private/tmp/ppck-frames-local. Existing live/responsive/scale scripts updated for automatic readiness; full old suites are not claimed rerun.
+
+## Previous completed baseline
 
 **Deployed and functional.** Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 

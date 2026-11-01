@@ -8,18 +8,18 @@ const context = await browser.newContext(); await context.tracing.start({ screen
 const page = await context.newPage(), result = [];
 try {
  await page.goto(process.env.PPCK_URL || 'https://junhoflow.github.io/dapulo-ppck-sync/');
- await expect(page.locator('#ready')).toBeEnabled({ timeout: 30000 });
+ await expect(page.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 30000 });
  for (const size of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1024, height: 768 }, { width: 1180, height: 820 }]) {
   await page.setViewportSize(size);
   assert.equal(await page.evaluate(() => Boolean(document.fullscreenElement)), false);
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
-  for (const id of ['ready', 'full']) {
+  for (const id of ['full']) {
    await expect(page.locator(`#${id}`)).toBeInViewport();
   }
   await page.screenshot({ path: `${output}/${size.width}x${size.height}.png`, fullPage: true });
-  result.push({ ...size, readyAndFullScreenButtonsInViewport: true, horizontalOverflow: false });
+  result.push({ ...size, fullScreenButtonInViewport: true, horizontalOverflow: false });
  }
- await page.setViewportSize({ width: 1024, height: 768 }); await page.locator('#ready').click();
+ await page.setViewportSize({ width: 1024, height: 768 });
  await page.screenshot({ path: `${output}/audience-ready.png` });
  console.log(JSON.stringify({ status: 'passed', result }));
  await writeFile(`${output}/results.json`, JSON.stringify({ status: 'passed', result }, null, 2));

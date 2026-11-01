@@ -33,14 +33,13 @@ try {
   for (const [browser, name, viewport] of [[chrome, 'chrome-tablet', { width: 1024, height: 768 }], [wk, 'webkit-tablet', { width: 1180, height: 820 }]]) {
     const { page, ctx } = await context(browser, name, viewport); audience.push({ page, ctx, name });
     assert.equal((await page.goto(base)).status(), 200);
-    await expect(page.locator('#ready')).toBeEnabled({ timeout: 45000 });
+    await expect(page.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 45000 });
     assert.deepEqual(await media(page).then(({ width, height, duration }) => ({ width, height, duration })), { width: 1920, height: 1080, duration: 12 });
-    await page.locator('#ready').click();
-    await expect(page.locator('#headline')).toHaveText('Your ocean is ready.', { timeout: 10000 });
+    await expect(page.locator('#ready')).toBeHidden();
   }
   await expect(admin.locator('#synced-count')).toHaveText('2', { timeout: 30000 });
   await admin.screenshot({ path: `${output}/admin-ready.png`, fullPage: true });
-  results.scenarios.push('Deployed HTML 200; full 1080p/12-second Blob download; audience user-gesture readiness; unauthorized admin disabled; two engines connected');
+  results.scenarios.push('Deployed HTML 200; full 1080p/12-second Blob download; automatic silent audience readiness; unauthorized admin disabled; two engines connected');
   for (let round = 0; round < 3; round++) {
     await expect(admin.locator('#restart')).toBeEnabled({ timeout: 10000 }); await admin.locator('#restart').click();
     await Promise.all(audience.map(({ page }) => expect(page.locator('#status')).toHaveText('Playing · 1080p', { timeout: 15000 })));
@@ -59,7 +58,7 @@ try {
   await Promise.all(audience.map(({ page }) => expect(page.locator('#status')).toHaveText('Playing · 1080p')));
   await Promise.all(audience.map(({ page }) => expect(page.locator('#status')).toHaveText('Demo complete', { timeout: 20000 })));
   await audience[0].page.screenshot({ path: `${output}/audience-end.png` });
-  results.scenarios.push('Three common-clock starts; pause/resume; preload preserves playing state; natural 12-second end screen');
+  results.scenarios.push('Three common-clock starts; pause/resume; preload preserves playing state; natural 12-second final-frame hold');
   // Reconnect one audience while presenter resets the common state.
   const disconnected = audience[0];
   await disconnected.ctx.setOffline(true);
@@ -70,13 +69,12 @@ try {
   await expect(disconnected.page.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 20000 });
   await expect(admin.locator('#synced-count')).toHaveText('2', { timeout: 20000 });
   results.scenarios.push('Offline audience reconnects and restores signed retained reset without another user gesture');
-  // Reload explicitly clears readiness until the viewer taps again.
+  // Reload automatically prepares the silent clip again.
   await audience[1].page.reload();
-  await expect(audience[1].page.locator('#ready')).toBeEnabled({ timeout: 30000 });
-  await expect(admin.locator('#ready-count')).toHaveText('1', { timeout: 20000 });
-  await audience[1].page.locator('#ready').click();
+  await expect(audience[1].page.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 30000 });
+  await expect(audience[1].page.locator('#ready')).toBeHidden();
   await expect(admin.locator('#synced-count')).toHaveText('2', { timeout: 20000 });
-  results.scenarios.push('Reload reconnects, requires fresh audience gesture, then becomes ready');
+  results.scenarios.push('Reload reconnects and automatically becomes ready');
   // Exercise full screen on Chrome from a genuine click.
   await audience[0].page.locator('#full').click();
   await expect.poll(() => audience[0].page.evaluate(() => Boolean(document.fullscreenElement))).toBe(true);

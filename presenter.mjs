@@ -17,12 +17,12 @@ function render() {
   const allReady = active.length > 0 && synced.length === active.length;
   el('readiness').textContent = !key ? '발표자 키를 열어주세요.' : !connected ? '중계 서버 재연결 중입니다.' :
     allReady ? `관객 ${active.length}대 모두 준비되었습니다. 재생할 수 있습니다.` :
-      `각 태블릿에서 Get ready를 누르고 화면을 켜 두세요. 준비/시계 보정 ${synced.length}/${active.length}대`;
+      `각 태블릿에서 영상 로딩을 기다리고 화면을 켜 두세요. 준비/시계 보정 ${synced.length}/${active.length}대`;
   for (const id of controls) el(id).disabled = !key || !connected || !subscribed || busy || (['play', 'restart'].includes(id) && !allReady);
   el('devices').replaceChildren(...active.map(d => {
     const row = document.createElement('tr');
     for (const text of [d.id.slice(0, 4).toUpperCase(), `${d.download}%${d.loaded ? ' · 1080p' : ''}`,
-      d.error || `${d.ready ? '준비' : '터치 필요'} · ${d.phase}${d.muted ? ' · 음소거' : ''}`,
+      d.error || `${d.ready ? '준비' : '준비 중'} · ${d.phase}${d.muted ? ' · 음소거' : ''}`,
       d.rtt === null ? '보정 중' : `${d.rtt} ms`, d.startError === null ? '—' : `${d.startError} ms`, d.visible ? '열림' : '백그라운드']) {
       const cell = document.createElement('td'); cell.textContent = String(text).slice(0, 140); row.append(cell);
     }
@@ -39,13 +39,13 @@ async function send(mode, restart = false, preload = false) {
     return;
   }
   const timestamp = now(), position = mode === 'waiting' || restart ? 0 : positionAt(state, timestamp);
-  const next = { kind: 'state', mode, position, at: timestamp + (mode === 'playing' ? 3000 : 0),
+  const next = { kind: 'state', mode, position, at: timestamp + (mode === 'playing' ? 600 : 0),
     issuedAt: timestamp, seq: sequence = Math.max(Math.floor(timestamp), sequence + 1), preload };
   try {
     const encoded = await sign(next, key);
     await publish(client, `${topic}/state`, encoded, true);
     state = next;
-    el('sent').textContent = `${mode === 'playing' ? '3초 뒤 재생 예약' : mode === 'paused' ? '일시정지' : preload ? '사전 로딩 확인' : '전체 초기화'} · 중계 서버 수신 확인 · ${new Date().toLocaleTimeString('ko-KR')}`;
+    el('sent').textContent = `${mode === 'playing' ? '전체 재생' : mode === 'paused' ? '일시정지' : preload ? '사전 로딩 확인' : '전체 초기화'} · 중계 서버 수신 확인 · ${new Date().toLocaleTimeString('ko-KR')}`;
   } catch (e) { el('sent').textContent = `전송 실패: ${e.message} 연결 복구 후 상태를 확인하세요.`; }
   finally { busy = false; render(); }
 }

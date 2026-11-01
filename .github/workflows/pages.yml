@@ -31,7 +31,7 @@ jobs:
       - name: Stage public files only
         run: |
           mkdir _site
-          cp index.html admin.html style.css *.mjs 27233.mp4 audience-qr.png .nojekyll _site/
+          cp index.html admin.html style.css *.mjs 27233.mp4 first-frame.jpg audience-qr.png .nojekyll _site/
           cp -R vendor _site/vendor
       - uses: actions/upload-pages-artifact@v3
         with:

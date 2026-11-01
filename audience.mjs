@@ -2,7 +2,7 @@ import { config } from './config.mjs';
 import { connect, publish } from './connection.mjs';
 import { topic, verify, validState, positionAt, clockSample, now } from './protocol.mjs';
 const el = id => document.getElementById(id), video = el('video');
-if (!config.hasAudio) { el('sound').textContent = 'Silent demo'; el('sound').disabled = true; }
+if (!config.hasAudio) { video.muted = true; el('sound').textContent = 'Silent demo'; el('sound').disabled = true; }
 const id = crypto.randomUUID().replaceAll('-', '').slice(0, 12);
 el('device').textContent = `Screen ${id.slice(0, 4).toUpperCase()}`;
 let client, loaded = false, ready = false, loading = false, download = 0, blobURL;
@@ -13,10 +13,6 @@ const pings = new Map();
 const presenterNow = () => now() + offset;
 const synced = () => clockAt > 0 && now() - clockAt < 25000;
 function status(text) { el('status').textContent = text; }
-function cover(headline, message, step = 'DAPULO · LIVE DEMO') {
-  el('cover').hidden = false; el('headline').textContent = headline;
-  el('message').textContent = message; el('step').textContent = step;
-}
 function report() {
   if (!client?.connected) return;
   publish(client, `${topic}/presence/${id}`, { id, loaded, ready, download, phase, error,
@@ -36,7 +32,7 @@ function ping() {
 }
 async function loadVideo() {
   if (loading || loaded) return;
-  loading = true; error = ''; phase = 'loading'; el('retry').hidden = true; el('ready').hidden = false;
+  loading = true; error = ''; phase = 'loading'; el('retry').hidden = true; el('ready').hidden = true;
   el('ready').disabled = true; el('ready').textContent = 'Loading video…';
   const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 120000);
   try {
@@ -64,33 +60,40 @@ async function loadVideo() {
     });
     loaded = true; download = 100; phase = 'loaded';
     el('progress').value = 100; el('loading').textContent = `1080p · ${video.duration.toFixed(1)} sec · Fully downloaded`;
-    el('ready').disabled = false; el('ready').textContent = 'Get ready';
-    el('message').textContent = config.hasAudio ? 'Tap once to enable video and sound.' : 'A silent 12-second demo. Tap once to get ready.';
-    status('Video downloaded · Tap Get ready'); report();
+    el('progress').hidden = true;
+    video.pause(); video.currentTime = 0;
+    if (!config.hasAudio) {
+      // This clip is silent; muted inline playback can be controlled without an entry tap.
+      ready = true; phase = 'ready'; el('ready').hidden = true;
+      status('Ready · Waiting for the presenter');
+      await applyState();
+    } else {
+      el('ready').hidden = false; el('ready').disabled = false;
+      el('ready').textContent = 'Enable playback'; status('Video downloaded · Tap Enable playback');
+    }
+    report();
   } catch (e) {
     error = `Video load failed: ${e.message}`; phase = 'error';
-    cover('Let’s try that again.', 'Check your connection, then retry the video download.');
     status(error); el('retry').hidden = false; el('ready').hidden = true; report();
   } finally { clearTimeout(timeout); loading = false; }
 }
-el('retry').onclick = () => { el('ready').hidden = false; loadVideo(); };
+el('retry').onclick = loadVideo;
 async function prepare() {
   const token = ++revision; clearTimeout(timer); el('ready').disabled = true;
   try {
     // Call unmuted play directly inside the real user click. Muted priming does not unlock audio on Safari.
-    video.muted = el('sound').getAttribute('aria-pressed') === 'true';
+    video.muted = !config.hasAudio || el('sound').getAttribute('aria-pressed') === 'true';
     await video.play();
     if (token !== revision) return;
     video.pause(); video.currentTime = 0; ready = true; error = ''; phase = 'ready';
     el('ready').hidden = true; el('progress').hidden = true;
-    cover('Your ocean is ready.', 'Please keep this screen open. The presenter will begin shortly.', 'READY WHEN YOU ARE');
     status(synced() ? 'Ready · Waiting for the presenter' : 'Ready · Waiting for presenter connection');
     navigator.wakeLock?.request('screen').catch(() => {});
     await applyState(); report();
   } catch {
     ready = false; error = 'Playback permission needed'; phase = 'blocked';
-    el('ready').disabled = false; el('ready').hidden = false; el('ready').textContent = 'Tap to allow playback';
-    status('Tap again to allow video and sound'); report();
+    el('ready').disabled = false; el('ready').hidden = false; el('ready').textContent = 'Enable playback';
+    status('Tap Enable playback to allow playback'); report();
   }
 }
 el('ready').onclick = prepare;
@@ -110,8 +113,9 @@ el('full').onclick = async () => {
   } catch { status('Full screen unavailable · Rotate your tablet for a larger view'); }
 };
 function finish() {
-  clearTimeout(timer); phase = 'ended'; el('count').textContent = '';
-  cover('Small focus. Real growth.', 'Thank you for diving into Dapulo.', 'THANK YOU');
+  clearTimeout(timer); phase = 'ended'; video.pause();
+  // Seek inside the final sample so browsers retain a decoded frame, including late recovery.
+  video.currentTime = Math.max(0, video.duration - 0.001);
   el('ready').hidden = true; status('Demo complete'); report();
 }
 video.addEventListener('ended', finish);
@@ -119,15 +123,13 @@ async function applyState() {
   if (!state || !ready || !loaded || !synced()) return;
   if (Math.abs(presenterNow() - state.issuedAt) > 12 * 3600000) return;
   const current = state, token = ++revision; clearTimeout(timer); video.pause();
-  appliedSeq = current.seq; el('count').textContent = ''; error = '';
+  appliedSeq = current.seq; error = '';
   if (current.mode === 'waiting') {
     video.currentTime = 0; startError = null; phase = 'ready';
-    cover('Your ocean is ready.', 'Please keep this screen open. The presenter will begin shortly.', 'READY WHEN YOU ARE');
     status('Ready · Waiting for the presenter'); report(); return;
   }
   if (current.mode === 'paused') {
-    video.currentTime = positionAt(current, presenterNow(), video.duration); phase = 'paused';
-    cover('A moment to breathe.', 'The presenter has paused the demo.', 'PAUSED');
+    video.currentTime = Math.min(video.duration - 0.001, positionAt(current, presenterNow(), video.duration)); phase = 'paused';
     status('Paused'); report(); return;
   }
   video.currentTime = positionAt(current, presenterNow(), video.duration);
@@ -135,14 +137,12 @@ async function applyState() {
     if (token !== revision) return;
     const left = current.at - presenterNow();
     if (left > 4) {
-      phase = 'scheduled'; el('count').textContent = String(Math.ceil(left / 1000));
-      cover('Dive in with us.', 'The demo is about to begin.', 'STARTING TOGETHER');
+      phase = 'scheduled';
       timer = setTimeout(start, Math.min(left, 50)); return;
     }
     const expected = positionAt(current, presenterNow(), video.duration);
     if (expected >= video.duration - 0.05) { video.currentTime = video.duration; finish(); return; }
     if (Math.abs(video.currentTime - expected) > 0.12) video.currentTime = expected;
-    el('count').textContent = ''; el('cover').hidden = true;
     startError = Math.round(presenterNow() - current.at); phase = 'starting';
     video.play().then(() => {
       if (token !== revision) return;
@@ -150,8 +150,7 @@ async function applyState() {
     }).catch(() => {
       if (token !== revision) return;
       ready = false; error = 'Autoplay blocked'; phase = 'blocked';
-      cover('One quick tap.', 'Your browser needs a tap to begin the demo.');
-      el('ready').hidden = false; el('ready').disabled = false; el('ready').textContent = 'Tap to play';
+      el('ready').hidden = false; el('ready').disabled = false; el('ready').textContent = 'Enable playback';
       status('Playback permission needed'); report();
     });
   }

@@ -28,7 +28,7 @@ try {
   }
   await p.goto(base);
   if (i === 4) { await expect(p.locator('#retry')).toBeVisible(); await admin.locator('#preload').click(); }
-  await expect(p.locator('#ready')).toBeEnabled({ timeout: 30000 }); await p.locator('#ready').click();
+  await expect(p.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 30000 });
  }
  await expect(admin.locator('#connected-count')).toHaveText('6', { timeout: 30000 });
  await expect(admin.locator('#synced-count')).toHaveText('6', { timeout: 30000 });
@@ -37,7 +37,7 @@ try {
  await contexts[0].context.setOffline(false);
  await expect(admin.locator('#conn')).toHaveText('실시간 연결됨', { timeout: 20000 });
  await expect(admin.locator('#restart')).toBeEnabled({ timeout: 20000 });
- result.scenarios.push('Presenter reconnects with its in-memory signing key; failed video fetch recovered by signed preload command and visible Get ready button');
+ result.scenarios.push('Presenter reconnects with its in-memory signing key; failed video fetch recovered by signed preload command and automatic silent-video readiness');
  await admin.locator('#restart').click();
  await Promise.all(viewers.map(p => expect(p.locator('#status')).toHaveText('Playing · 1080p', { timeout: 15000 })));
  const positions = await Promise.all(viewers.map(p => p.locator('video').evaluate(v => v.currentTime)));
