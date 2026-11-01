@@ -4,13 +4,19 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `751619343922f1a2682fdeeb079446aacd9dfcc5`, successful [Pages run 41340895589](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41340895589). Behavioral test source: 0f38134; final 7516193 adds CSS centering only, then passed responsive verification again.
+Final deployed commit: `bb6ded2741c8945125400d14f3108a288c6ac276`, successful [Pages run 41342791226](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41342791226).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest follow-up — first/last video frame behavior
+## Latest follow-up — per-tablet replay
 
-The user replaced the original waiting/countdown/thank-you flow. Current deployed commit is `1a16d9f6575f81fc8f9c45df8a133b2cad6b709f`, [successful Pages run 41342461360](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41342461360).
+First viewing remains controlled by the presenter. At the final held video frame, a centered Watch again button allows each viewer to start/repeat their own playback, without publishing any central control command. Other tablets keep their own positions. Reconnect/visibility/clock updates for the same presenter command do not interrupt personal playback. A newer signed central reset/restart still applies to every screen.
+
+Local `tests/individual-replay.mjs` passed with Chrome + WebKit: initial replay hidden and first frame paused, central first play, center-positioned button at end, A replaying while B remains paused, independent staggered replay (3.674 sec vs 0.013 sec), continued local playback through visibility and offline/reconnect, button returns after repeat end, and central reset restores both screens. Actual Pages Chrome + WebKit verification also PASSED all scenarios, with independent positions 3.666 sec vs 0.010 sec. No audience replay caused another screen to start or seek. Local evidence: `/private/tmp/ppck-replay-local`; deployed evidence: `/private/tmp/ppck-replay-deployed`. Screenshots/Playwright traces preserved and the center-button screenshot visually inspected. Syntax checks, protocol tests 3/3 and diff check passed. Physical tablet coverage remains as limited below.
+
+## Earlier follow-up — first/last video frame behavior
+
+The user replaced the original waiting/countdown/thank-you flow. Earlier deployed commit was `1a16d9f6575f81fc8f9c45df8a133b2cad6b709f`, [successful Pages run 41342461360](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41342461360).
 
 Actual Pages test `tests/video-frames.mjs` passed on Chrome and Playwright WebKit, with no audience gesture: first frame visible and paused at time 0, no overlays or countdown, presenter start observed after 803 ms, pause keeps video visible, natural end holds the last decoded frame at 11.999 seconds, and reset returns to time 0. The entire source remains 1080p/12 seconds and silent. The shared-clock delivery buffer is 600 ms and has no visible countdown. If a browser restricts autoplay, a small Enable playback button appears below the video.
 
