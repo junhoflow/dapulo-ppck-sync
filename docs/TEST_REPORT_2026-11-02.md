@@ -8,7 +8,15 @@ Final deployed commit: `751619343922f1a2682fdeeb079446aacd9dfcc5`, successful [P
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Verified functionality
+## Latest follow-up — first/last video frame behavior
+
+The user replaced the original waiting/countdown/thank-you flow. Current deployed commit is `1a16d9f6575f81fc8f9c45df8a133b2cad6b709f`, [successful Pages run 41342461360](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41342461360).
+
+Actual Pages test `tests/video-frames.mjs` passed on Chrome and Playwright WebKit, with no audience gesture: first frame visible and paused at time 0, no overlays or countdown, presenter start observed after 803 ms, pause keeps video visible, natural end holds the last decoded frame at 11.999 seconds, and reset returns to time 0. The entire source remains 1080p/12 seconds and silent. The shared-clock delivery buffer is 600 ms and has no visible countdown. If a browser restricts autoplay, a small Enable playback button appears below the video.
+
+First and final screenshots were inspected. Local and deployed traces/results: `/private/tmp/ppck-frames-local` and `/private/tmp/ppck-frames-deployed`. Syntax checks, protocol tests 3/3 and diff check passed. This scoped follow-up did not rerun the earlier full six-viewer/connection suites; the earlier results below describe their tested baseline. In particular, the old Get ready/new-gesture/countdown/thank-you descriptions below are superseded.
+
+## Earlier verified baseline
 
 | Item | Evidence / result |
 | --- | --- |
