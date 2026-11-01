@@ -17,10 +17,10 @@ for(const[engine,name,ipad]of[[chromium,'chrome-ipad-branch-touch',true],[webkit
   await page.goto(base);await expect(page.locator('#loading')).toContainText('Fully downloaded',{timeout:30000});
   await page.locator('#full').click();await expect.poll(()=>page.evaluate(()=>document.fullscreenElement?.id)).toBe('presentation');
   await page.locator('video').evaluate(v=>v.dispatchEvent(new Event('ended')));
-  await expect(page.frameLocator('#homepage').getByRole('heading',{level:1})).toContainText('집중할수록',{timeout:30000});
+  await expect(page.frameLocator('#homepage').getByRole('heading',{level:1})).toContainText('Draw your coral.',{timeout:30000});
   if(ipad){await expect.poll(()=>page.evaluate(()=>document.fullscreenElement)).toBe(null);await expect(page.locator('#presentation')).toHaveClass(/is-expanded/);await expect(page.getByRole('button',{name:'Exit large view'})).toBeVisible();}
   else{assert.equal(await page.evaluate(()=>document.fullscreenElement?.id),'presentation');await expect(page.locator('#presentation')).not.toHaveClass(/is-expanded/);}
-  const frame=page.frames().find(f=>f.url()==='https://dapulo.com/');await frame.evaluate(()=>document.fonts.ready);
+  const frame=page.frames().find(f=>f.url()==='https://dapulo.com/en');await frame.evaluate(()=>document.fonts.ready);
   await expect.poll(()=>frame.evaluate(()=>[...document.images].filter(i=>{const r=i.getBoundingClientRect();return r.width>0&&r.height>0&&r.top<innerHeight&&r.bottom>0;}).every(i=>i.complete&&i.naturalWidth>0)),{timeout:15000}).toBe(true);
   const box=await page.locator('#homepage').boundingBox(),x=box.x+box.width*.5,y=box.y+box.height*.75;
   if(engine===chromium){const cdp=await context.newCDPSession(page);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=12;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-i*22}]});await page.evaluate(()=>new Promise(requestAnimationFrame));}await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}

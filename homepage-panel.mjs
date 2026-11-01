@@ -40,7 +40,7 @@ export function showHomepage({ nativeVideoFullscreen = false } = {}) {
 function loadHomepage() {
   if (!homepage.hasAttribute('src')) {
     homepage.getBoundingClientRect();
-    homepage.src = 'https://dapulo.com/';
+    homepage.src = 'https://dapulo.com/en';
   }
 }
 export function hideHomepage() {

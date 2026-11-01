@@ -21,7 +21,7 @@ try {
  const viewers = [], loads = [0, 0];
  for (const [i, browser] of [chrome, wk].entries()) {
   const page = await newPage(browser, i ? 'webkit' : 'chrome'); viewers.push(page);
-  await page.route('https://dapulo.com/', route => { loads[i]++; return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: fixture }); });
+  await page.route('https://dapulo.com/en', route => { loads[i]++; return route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: fixture }); });
   await page.goto(base); await expect(page.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 30000 });
   await expect(page.locator('#homepage-panel')).toBeHidden(); assert.equal(loads[i], 0);
  }
@@ -42,7 +42,7 @@ try {
     await expect.poll(() => p.evaluate(() => document.fullscreenElement?.id)).toBe('presentation');
     await p.evaluate(() => document.exitFullscreen());
   }
-  const frame = p.frames().find(f => f.url() === 'https://dapulo.com/');
+  const frame = p.frames().find(f => f.url() === 'https://dapulo.com/en');
   await frame.evaluate(() => window.scrollTo(0, 600));
   await expect.poll(() => frame.evaluate(() => scrollY)).toBeGreaterThan(550);
   await p.locator('#replay').click(); await expect(p.locator('#status')).toHaveText('Replaying on this screen');

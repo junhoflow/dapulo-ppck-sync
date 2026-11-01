@@ -21,8 +21,8 @@ for (const [engine, name, touch] of [[chromium, 'chrome-wheel', false], [webkit,
   await expect(page.locator('#loading')).toContainText('Fully downloaded', { timeout: 30000 });
   if (touch) { await page.locator('#full').click(); await expect.poll(() => page.evaluate(() => document.fullscreenElement?.id)).toBe('presentation'); }
   await page.locator('video').evaluate(video => video.dispatchEvent(new Event('ended')));
-  await expect(page.frameLocator('#homepage').getByRole('heading', { level: 1 })).toContainText('집중할수록', { timeout: 30000 });
-  const frame = homeFrame = page.frames().find(frame => frame.url() === 'https://dapulo.com/');
+  await expect(page.frameLocator('#homepage').getByRole('heading', { level: 1 })).toContainText('Draw your coral.', { timeout: 30000 });
+  const frame = homeFrame = page.frames().find(frame => frame.url() === 'https://dapulo.com/en');
   for (const scope of [page, frame]) await scope.evaluate(() => { window.__wheelInput = []; addEventListener('wheel', e => queueMicrotask(() => window.__wheelInput.push({target:e.target.tagName, prevented:e.defaultPrevented, dy:e.deltaY})), {capture:true,passive:true}); });
   await expect.poll(() => page.locator('#homepage-panel').evaluate(e => e.getAnimations().filter(a => a.playState === 'running').length)).toBe(0);
   const box = await page.locator('#homepage').boundingBox(), x = box.x + box.width / 2, y = box.y + box.height * .7;

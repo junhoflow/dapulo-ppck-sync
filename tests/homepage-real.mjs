@@ -4,7 +4,7 @@ const { chromium, webkit, expect } = await import(process.env.PLAYWRIGHT_MODULE 
 const base = process.env.PPCK_URL || 'https://junhoflow.github.io/dapulo-ppck-sync/';
 const output = process.env.PPCK_EVIDENCE || `/private/tmp/ppck-real-home-${Date.now()}`;
 await mkdir(output, { recursive: true });
-const browsers = [], contexts = [], pages = [], result = { base, homepage: 'REAL https://dapulo.com/ — no route substitution or header stripping', observations: [] };
+const browsers = [], contexts = [], pages = [], result = { base, homepage: 'REAL https://dapulo.com/en — no route substitution or header stripping', observations: [] };
 async function newPage(browser, name) {
  const context = await browser.newContext({ viewport: { width: 1180, height: 820 } });
  contexts.push({ context, name }); await context.tracing.start({ screenshots: true, snapshots: true });
@@ -19,7 +19,7 @@ try {
  const viewers = [], loads = [0, 0];
  for (const [i, browser] of [chrome, wk].entries()) {
   const page = await newPage(browser, i ? 'webkit' : 'chrome'); viewers.push(page);
-  page.on('request', req => { if (req.url() === 'https://dapulo.com/' && req.resourceType() === 'document') loads[i]++; });
+  page.on('request', req => { if (req.url() === 'https://dapulo.com/en' && req.resourceType() === 'document') loads[i]++; });
   await page.goto(base); await expect(page.locator('#status')).toHaveText('Ready · Waiting for the presenter', { timeout: 30000 });
   await expect(page.locator('#homepage-panel')).toBeHidden(); assert.equal(loads[i], 0);
  }
@@ -30,8 +30,8 @@ try {
  for (const [i, p] of viewers.entries()) {
   await expect(p.locator('#homepage-panel')).toBeVisible();
   const content = p.frameLocator('#homepage');
-  await expect(content.getByRole('heading', { level: 1 })).toContainText('집중할수록', { timeout: 30000 });
-  const frame = p.frames().find(f => f.url() === 'https://dapulo.com/'); assert.ok(frame);
+  await expect(content.getByRole('heading', { level: 1 })).toContainText('Draw your coral.', { timeout: 30000 });
+  const frame = p.frames().find(f => f.url() === 'https://dapulo.com/en'); assert.ok(frame);
   await frame.evaluate(() => document.fonts.ready);
   await expect.poll(() => frame.evaluate(() => [...document.images].filter(img => {
    const r = img.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.top < innerHeight && r.bottom > 0;
@@ -48,7 +48,7 @@ try {
  }
  await Promise.all(viewers.map(p => expect(p.locator('#status')).toHaveText('Demo complete', { timeout: 18000 })));
  for (const [i, p] of viewers.entries()) {
-  const frame = p.frames().find(f => f.url() === 'https://dapulo.com/');
+  const frame = p.frames().find(f => f.url() === 'https://dapulo.com/en');
   assert.equal(loads[i], 1); assert.ok(await frame.evaluate(() => scrollY) > 550);
   await expect(p.locator('#replay')).toBeVisible(); await frame.evaluate(() => scrollTo(0, 0));
   for (const size of [{ width: 1180, height: 820 }, { width: 1024, height: 768 }, { width: 844, height: 390 }, { width: 390, height: 844 }]) {

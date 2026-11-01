@@ -10,9 +10,9 @@ for(const [engine,name]of[[chromium,'chrome'],[webkit,'webkit']]){
  browser=await engine.launch({...(engine===chromium?{channel:'chrome'}:{}),headless:true});context=await browser.newContext({viewport:{width:1180,height:820},hasTouch:true});await context.tracing.start({screenshots:true,snapshots:true});page=await context.newPage();const errors=[];page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
  await page.routeWebSocket('wss://broker.emqx.io:8084/mqtt',s=>s.onMessage(()=>{}));
  await page.goto(base);await expect(page.locator('#loading')).toContainText('Fully downloaded',{timeout:30000});await page.locator('video').evaluate(v=>v.dispatchEvent(new Event('ended')));
- const f=page.frameLocator('#homepage');await expect(f.getByRole('heading',{level:1})).toContainText('집중할수록',{timeout:30000});
+ const f=page.frameLocator('#homepage');await expect(f.getByRole('heading',{level:1})).toContainText('Draw your coral.',{timeout:30000});
  const appResponse=page.waitForResponse(response=>new URL(response.url()).origin==='https://dapulo.com'&&new URL(response.url()).pathname==='/app'&&response.request().isNavigationRequest());
- await f.locator('#hero').getByRole('link',{name:'내 산호 키우러 가기',exact:true}).click();const response=await appResponse;
+ await f.locator('#hero').getByRole('link',{name:'Grow my coral',exact:true}).click();const response=await appResponse;
  const policy=response.headers()['content-security-policy'];assert.ok(policy.includes("frame-ancestors 'self' https://junhoflow.github.io;"));assert.ok(policy.includes("script-src 'self' 'nonce-"));assert.ok(policy.includes("script-src-attr 'none'"));assert.ok(policy.includes("worker-src 'self' blob:"));assert.equal(response.headers()['x-frame-options'],undefined);
  const nonce=policy.match(/'nonce-([^']+)'/)[1];assert.ok((await response.text()).includes(`nonce="${nonce}"`));
  await expect(f.getByRole('heading',{name:'나와 함께할 친구는?',exact:true})).toBeVisible({timeout:30000});
