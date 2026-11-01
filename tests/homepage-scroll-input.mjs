@@ -1,28 +1,56 @@
-import {mkdir,writeFile} from 'node:fs/promises';
-const {chromium,webkit,expect}=await import(process.env.PLAYWRIGHT_MODULE||'@playwright/test');
-const base=process.env.PPCK_URL||'https://junhoflow.github.io/dapulo-ppck-sync/';
-const out=process.env.PPCK_EVIDENCE||`/private/tmp/ppck-scroll-input-${Date.now()}`;await mkdir(out,{recursive:true});
-const browsers=[],contexts=[],pages=[],result={base,observations:[]};
-async function make(browser,name,mobile=false){const ctx=await browser.newContext({viewport:{width:1180,height:820},hasTouch:mobile,isMobile:mobile});contexts.push({ctx,name});await ctx.tracing.start({screenshots:true,snapshots:true});const page=await ctx.newPage();pages.push({page,name});return{ctx,page};}
-try{
- const ch=await chromium.launch({channel:'chrome',headless:true});browsers.push(ch);
- const wk=await webkit.launch({headless:true});browsers.push(wk);
- const {page:admin}=await make(ch,'admin');await admin.goto(new URL('admin.html',base).href);await admin.locator('#key').setInputFiles(process.env.PPCK_KEY);await expect(admin.locator('#reset')).toBeEnabled({timeout:30000});await admin.locator('#reset').click();
- const viewers=[];
- for(const[browser,name,touch]of[[ch,'chrome-wheel',false],[wk,'webkit-wheel',false],[ch,'chrome-touch',true]]){const viewer=await make(browser,name,touch);viewer.name=name;viewer.touch=touch;viewers.push(viewer);await viewer.page.goto(base);await expect(viewer.page.locator('#status')).toHaveText('Ready · Waiting for the presenter',{timeout:30000});}
- await viewers[2].page.locator('#full').click();await expect.poll(()=>viewers[2].page.evaluate(()=>document.fullscreenElement?.id)).toBe('presentation');
- await expect(admin.locator('#play')).toBeEnabled({timeout:30000});await admin.locator('#play').click();
- await Promise.all(viewers.map(({page})=>expect(page.locator('#status')).toHaveText('Demo complete',{timeout:20000})));
- for(const v of viewers){const p=v.page;await p.bringToFront();await expect(p.frameLocator('#homepage').getByRole('heading',{level:1})).toContainText('집중할수록',{timeout:30000});const f=p.frames().find(f=>f.url()==='https://dapulo.com/');await expect.poll(()=>p.locator('#homepage').evaluate(e=>e.getBoundingClientRect().width)).toBeGreaterThan(300);
- const box=await p.locator('#homepage').boundingBox();const x=box.x+box.width*.5,y=box.y+box.height*.7;
- const before=await f.evaluate(()=>({y:scrollY,scrollHeight:document.documentElement.scrollHeight,height:innerHeight,htmlOverflow:getComputedStyle(document.documentElement).overflow,bodyOverflow:getComputedStyle(document.body).overflow,touchAction:getComputedStyle(document.documentElement).touchAction}));
- const host=await p.locator('#homepage-panel').evaluate(e=>({inert:e.inert,pointer:getComputedStyle(e).pointerEvents,transform:getComputedStyle(e).transform,html:document.elementFromPoint(e.getBoundingClientRect().x+50,e.getBoundingClientRect().y+150)?.outerHTML.slice(0,140)}));
- if(v.touch){const cdp=await v.ctx.newCDPSession(p);await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});for(let i=1;i<=12;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-i*22}]});}await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
- else{await p.mouse.move(x,y);await p.mouse.wheel(0,650);}
- try{await expect.poll(()=>f.evaluate(()=>scrollY),{timeout:5000}).toBeGreaterThan(100);result.observations.push({name:v.name,before,host,after:await f.evaluate(()=>scrollY),passed:true,fullscreen:await p.evaluate(()=>document.fullscreenElement?.id||null)});}catch(e){result.observations.push({name:v.name,before,host,after:await f.evaluate(()=>scrollY),outerScroll:await p.evaluate(()=>scrollY),passed:false,error:String(e)});}
- await p.screenshot({path:`${out}/${v.name}.png`,fullPage:true});
+// Isolated native-input regression: real PPCK origin and real dapulo.com iframe.
+// MQTT is disconnected in these test pages, and a local ended event only opens the existing panel.
+// This avoids sending presenter commands to the user's live tablets during input diagnostics.
+import { mkdir, writeFile } from 'node:fs/promises';
+const { chromium, webkit, expect } = await import(process.env.PLAYWRIGHT_MODULE || '@playwright/test');
+const base = process.env.PPCK_URL || 'https://junhoflow.github.io/dapulo-ppck-sync/';
+const out = process.env.PPCK_EVIDENCE || `/private/tmp/ppck-scroll-input-${Date.now()}`;
+await mkdir(out, { recursive: true });
+const results = { base, scope: 'real homepage/native input; isolated MQTT and synthetic panel-opening end event; separate browser per case', cases: [] };
+for (const [engine, name, touch] of [[chromium, 'chrome-wheel', false], [webkit, 'webkit-wheel', false], [chromium, 'chrome-touch-fullscreen', true]]) {
+ if (process.env.PPCK_CASE && process.env.PPCK_CASE !== name) continue;
+ let browser, context, page, homeFrame;
+ const result = { name };
+ try {
+  browser = await engine.launch({ ...(engine === chromium ? { channel: 'chrome' } : {}), headless: true });
+  context = await browser.newContext({ viewport: { width: 1180, height: 820 }, hasTouch: touch, isMobile: touch });
+  await context.tracing.start({ screenshots: true, snapshots: true });
+  page = await context.newPage();
+  await page.routeWebSocket('wss://broker.emqx.io:8084/mqtt', socket => socket.onMessage(() => {}));
+  await page.goto(base);
+  await expect(page.locator('#loading')).toContainText('Fully downloaded', { timeout: 30000 });
+  if (touch) { await page.locator('#full').click(); await expect.poll(() => page.evaluate(() => document.fullscreenElement?.id)).toBe('presentation'); }
+  await page.locator('video').evaluate(video => video.dispatchEvent(new Event('ended')));
+  await expect(page.frameLocator('#homepage').getByRole('heading', { level: 1 })).toContainText('집중할수록', { timeout: 30000 });
+  const frame = homeFrame = page.frames().find(frame => frame.url() === 'https://dapulo.com/');
+  for (const scope of [page, frame]) await scope.evaluate(() => { window.__wheelInput = []; addEventListener('wheel', e => queueMicrotask(() => window.__wheelInput.push({target:e.target.tagName, prevented:e.defaultPrevented, dy:e.deltaY})), {capture:true,passive:true}); });
+  await expect.poll(() => page.locator('#homepage-panel').evaluate(e => e.getAnimations().filter(a => a.playState === 'running').length)).toBe(0);
+  const box = await page.locator('#homepage').boundingBox(), x = box.x + box.width / 2, y = box.y + box.height * .7;
+  result.before = await frame.evaluate(() => scrollY);
+  if (touch) {
+   const cdp = await context.newCDPSession(page);
+   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+   for (let i = 1; i <= 12; i++) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y - i * 22 }] });
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+   }
+   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  } else { await page.mouse.move(x, y); await page.mouse.wheel(0, 650); }
+  await expect.poll(() => frame.evaluate(() => scrollY), { timeout: 5000 }).toBeGreaterThan(100);
+  result.after = await frame.evaluate(() => scrollY);
+  result.host = await page.locator('#homepage-panel').evaluate(e => ({ transform: getComputedStyle(e).transform, inert: e.inert }));
+  result.fullscreen = await page.evaluate(() => document.fullscreenElement?.id || null);
+  result.status = 'passed';
+  await page.screenshot({ path: `${out}/${name}.png`, fullPage: true });
+ } catch (error) {
+  result.status = 'failed'; result.error = String(error); result.url = page?.url(); process.exitCode = 1;
+  result.frameDiagnostic = await homeFrame?.evaluate(() => ({wheel:window.__wheelInput, y:scrollY, h1Top:document.querySelector('h1')?.getBoundingClientRect().top, scrollers:[...document.querySelectorAll('*')].filter(e=>e.scrollTop>0).map(e=>({tag:e.tagName,class:e.className,y:e.scrollTop}))})).catch(()=>null);
+  result.parentDiagnostic = await page?.evaluate(() => ({wheel:window.__wheelInput, y:scrollY})).catch(()=>null);
+  await page?.screenshot({ path: `${out}/failure-${name}.png`, fullPage: true }).catch(() => {});
+ } finally {
+  results.cases.push(result);
+  await context?.tracing.stop({ path: `${out}/trace-${name}.zip` }); await browser?.close();
  }
- result.status=result.observations.every(x=>x.passed)?'passed':'failed';if(result.status==='failed')process.exitCode=1;
- await admin.locator('#reset').click();
-}catch(e){result.status='failed';result.error=String(e);console.error(e);process.exitCode=1;for(const{page,name}of pages)await page.screenshot({path:`${out}/failure-${name}.png`,fullPage:true}).catch(()=>{});}
-finally{await writeFile(`${out}/results.json`,JSON.stringify(result,null,2));for(const{ctx,name}of contexts){await ctx.tracing.stop({path:`${out}/trace-${name}.zip`});await ctx.close();}for(const b of browsers)await b.close();console.log(JSON.stringify(result));}
+}
+results.status = results.cases.every(result => result.status === 'passed') ? 'passed' : 'failed';
+await writeFile(`${out}/results.json`, JSON.stringify(results, null, 2)); console.log(JSON.stringify(results));

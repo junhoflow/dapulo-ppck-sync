@@ -1,4 +1,4 @@
-import { showHomepage, hideHomepage } from './homepage-panel.mjs';
+import { showHomepage, hideHomepage } from './homepage-panel.mjs?v=20261102-touch6';
 import { config } from './config.mjs';
 import { connect, publish } from './connection.mjs';
 import { topic, verify, validState, positionAt, clockSample, now } from './protocol.mjs';

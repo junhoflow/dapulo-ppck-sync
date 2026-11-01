@@ -43,3 +43,7 @@ No build step or npm runtime dependencies. Serve this directory over HTTP locall
 Physical iPad/Android, actual Safari, venue Wi-Fi, automatic lock/low-power mode, audio and physical panel synchronization require on-site testing. Playwright WebKit is engine coverage, not a claim of real iPad/Safari coverage. This supplied clip is silent on every device.
 
 Official references: [Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits), [WebKit autoplay policy](https://webkit.org/blog/7734/auto-play-policy-changes-for-macos/), [EMQX public broker](https://www.emqx.com/en/mqtt/public-mqtt5-broker).
+
+## Tablet touch-scroll update
+
+The homepage frame is shown/sized before navigation, uses an explicit native scroll viewport, and is no longer loaded under an inert/transforming ancestor. Entry CSS and frame modules carry release query versions to avoid stale tablet caches. If testing an already-open page, reload the latest entry before running the video. Actual trusted Chrome mobile touch-swipe emulation and WebKit wheel input passed; physical iPad/Android verification remains separate. Earlier scrollTo-based tests alone did not establish native gesture behavior.
