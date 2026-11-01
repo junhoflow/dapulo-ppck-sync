@@ -4,11 +4,19 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `f704f8f16c544a7e264ff93debdd3f7b31366bed`, successful [Pages run 41345745012](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41345745012).
+Final deployed commit: `947dcba0cf320b95b782339c8d52c41d71699b94`, successful [Pages run 41346420215](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41346420215).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest iPad native-fullscreen workaround
+## Latest actual app inside the mobile panel
+
+User requested the actual /app continue inside the same right panel and separately approved the concrete Cloudflare exception. Added app-only rule `7cba8f1a7a6b426f9d767e9ae99001da`, preserving per-response nonce and all original script/worker directives while allowing only https://junhoflow.github.io in frame-ancestors. Root rule unchanged. /erp retains SAMEORIGIN; API health remains401. No Dapulo app assets/Worker/DB deployment. See APP_EMBED_APPROVAL.md and DAPULO_APP_EMBED_RULE.json.
+
+Actual deployed app8 `tests/app-embedded.mjs` PASSED Chrome + Playwright WebKit: real hero link → real app, 388px mobile viewport, character selection, next/back, reload retaining local guest selection, completing local-only guest onboarding to 나의 바다, notifications open/back, and personal video replay preserving app. Actual HTML nonce matches the response CSP. Chrome camera/mic capability delegation true; geolocation false. No camera/mic permission granted and no capture tested. Evidence /private/tmp/ppck-app-embedded-final; Chrome screenshot inspected. Initial abbreviated-label locator failure preserved at /private/tmp/ppck-app-navigation-before; corrected scoped hero locator confirmed original block. Preliminary urllib header request got Cloudflare403; normal curl and real browser results confirm behavior.
+
+Physical tablet app use, embedded social login, recording and authenticated focus/data saving remain unverified. Test anonymous state stays in isolated local browser storage; no existing account data changed or live playback command sent. Syntax, protocol3/3 and diff checks pass.
+
+## Previous iPad native-fullscreen workaround
 
 User physically confirmed Galaxy Tab scrolling works, but iPad fails specifically in native fullscreen. On iPad video end, exit native browser fullscreen before loading the real homepage and use a CSS large normal-document split view. Initial video fullscreen remains available; subsequent homepage Large view does not enter native fullscreen. Close control exits Large view. Android keeps native fullscreen. No Dapulo production source/settings/Worker/DB change. Cache version: ipad7.
 

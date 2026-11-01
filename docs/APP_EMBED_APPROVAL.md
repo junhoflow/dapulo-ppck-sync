@@ -16,8 +16,14 @@ Camera/microphone are delegated to the exact dapulo.com origin so the existing a
 
 Disable/remove only the new app embed rule. The source /app nonce policy and SAMEORIGIN then apply again. Root rule remains. Revert the PPCK iframe capability change independently if desired.
 
-## Verification pending
+## Completed verification
 
-Actual deployed PPCK → real hero CTA → real app guest UI and scoped interaction in Chrome/WebKit, iframe scrolling and personal replay preservation, app nonce policy, unaffected API/ERP. Do not send central playback commands to real tablets during tests.
+PPCK commit `947dcba0cf320b95b782339c8d52c41d71699b94` deployed successfully in Pages run `41346420215`; app8 assets verified at actual origin. tests/app-embedded.mjs passes Chrome + WebKit using real unmodified responses: hero CTA opens actual /app at 388px; character selection, next/back, reload retaining local choice, completing local guest onboarding into 나의 바다, notifications open/back, and video personal replay preserving app. Actual response nonce matches script nonce; script-src/script-src-attr/worker-src remain. Chrome feature-policy query permits camera/microphone delegation and denies geolocation, without granting permission or opening devices.
+
+Normal curl HEAD: /app and /app/login200 allow PPCK while keeping nonce directives; /erp200 retains SAMEORIGIN; /api/health401 retains API authentication. A preliminary urllib client got Cloudflare403; that bot-blocked result is retained and excluded from origin conclusions. Actual browser GETs and curl confirmed success.
+
+Evidence: /private/tmp/ppck-app-embedded-final/results.json and screenshots/traces; /private/tmp/ppck-app-curl-headers-after.json. Initial deployment-after-rule guest interaction test also passed both engines before the frame capability update. Test MQTT disconnected; no live central control commands. Anonymous choices stay in test-browser local storage. No account records were edited. Chrome screenshot visually inspected. Syntax, protocol3/3 and diff checks passed.
+
+Not verified: physical iPad/Android app sessions, embedded social login, recording/device capture or authenticated focus/data saving. The normal app login and data rules are unchanged.
 
 Official rule function references: https://developers.cloudflare.com/ruleset-engine/rules-language/functions/#split and https://developers.cloudflare.com/ruleset-engine/rules-language/functions/#join .
