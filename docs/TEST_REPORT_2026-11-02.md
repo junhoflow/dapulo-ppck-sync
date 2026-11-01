@@ -4,11 +4,23 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `1ff3eaa7feb1497bdb4379de2e2558aaa2c1057c`, successful [Pages run 41343753757](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41343753757).
+Final deployed commit: `e5dda4866e6ca55eca4f4a065eec9e02ba040058`, successful [Pages run 41345187475](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41345187475).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest follow-up — real mobile homepage beside video
+## Latest tablet touch-scroll fix
+
+The user reported finger scrolling failed on both iPad and Android. Earlier window.scrollTo-based tests proved scroll-state changes, not native finger input; that gap is explicitly acknowledged.
+
+Compatibility changes: show/size the iframe before URL navigation; remove redundant inert toggling and retained transform/grid animation around the frame; add a fixed native scrolling wrapper with explicit iframe height, scrolling=yes and vertical touch pan allowance. Version entry CSS/audience/homepage module URLs so a tablet reload cannot keep the earlier setup. Latest entry: https://junhoflow.github.io/dapulo-ppck-sync/?v=touch6 . No Dapulo app/Worker/DB or production-header changes in this fix.
+
+Actual input results (real homepage, not fake scrollTo): WebKit wheel0→650 passed; Chrome mobile trusted CDP finger swipe in combined fullscreen passed (0→260 and timed gesture0→128). Final versioned-entry Chrome mobile fullscreen gesture0→138 passed at /private/tmp/ppck-touch-version6-final. These are browser emulation/engine results, NOT physical tablet certification.
+
+Initial and after-test Chrome desktop wheel checks intermittently stayed at0; aggregate runs are preserved as failed, not called all-pass. A separate focused event-instrumented Chrome wheel case advanced650. No deterministic explanation of that intermittent first desktop wheel is claimed. Evidence: /private/tmp/ppck-scroll-input-before, /private/tmp/ppck-scroll-input-after, /private/tmp/ppck-scroll-input-isolated, /private/tmp/ppck-scroll-wheel-event-diagnosis. An auxiliary unisolated diagnostic lost the panel to a retained central reset, so it is excluded from scroll conclusions. The final diagnostic harness uses separate browsers, disconnects only the test page's MQTT and opens the panel via a local synthetic ended event, avoiding interference with user-controlled tablets. Real homepage and real gesture input remain untouched.
+
+Physical iPad/Android confirmation was requested from the user and is pending. Do not claim the reported physical-device defect is confirmed resolved until that reply arrives. Reopen the latest versioned URL and run the first video to reveal the homepage before checking finger scroll.
+
+## Earlier follow-up — real mobile homepage beside video
 
 On natural video end, the video moves left and the actual mobile-width https://dapulo.com/ homepage opens on the right. Personal replay keeps that homepage mounted with its scroll intact; central reset restores video-only viewing. Narrow phone portrait stacks the panels. Fullscreen now encloses both.
 
