@@ -23,6 +23,7 @@ jobs:
         run: |
           test -s 27233.mp4
           test -s admin.html
+          test -s app-icon.png
           test -s vendor/mqtt.min.js
           node --check audience.mjs
           node --check presenter.mjs
@@ -31,7 +32,7 @@ jobs:
       - name: Stage public files only
         run: |
           mkdir _site
-          cp index.html admin.html style.css *.mjs 27233.mp4 first-frame.jpg audience-qr.png .nojekyll _site/
+          cp index.html admin.html style.css *.mjs 27233.mp4 first-frame.jpg app-icon.png audience-qr.png .nojekyll _site/
           cp -R vendor _site/vendor
       - uses: actions/upload-pages-artifact@v3
         with:

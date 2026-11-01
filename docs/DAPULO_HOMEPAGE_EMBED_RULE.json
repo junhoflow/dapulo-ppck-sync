@@ -1,6 +1,6 @@
 {
-  "description": "PPCK: permit owner GitHub Pages to embed only the public Dapulo homepage",
-  "expression": "(http.host eq \"dapulo.com\" and http.request.uri.path eq \"/\")",
+  "description": "PPCK: permit owner GitHub Pages to embed Korean and English public Dapulo homepages",
+  "expression": "(http.host eq \"dapulo.com\" and http.request.uri.path in {\"/\" \"/en\" \"/en/\"})",
   "action": "rewrite",
   "action_parameters": {
     "headers": {

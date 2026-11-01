@@ -2,6 +2,8 @@
 
 Later 2026-11-02 follow-up: the user separately approved embedding the actual /app too. A separate app rule now preserves its dynamic nonce policy; see [APP_EMBED_APPROVAL.md](APP_EMBED_APPROVAL.md). The historical root-only boundary below describes the earlier approval, not the current app rule.
 
+Latest public-language follow-up: the user explicitly requested ENG switching work in the same panel. On 2026-11-02 expanded existing public rule `e25350803a7746ae9432bd3f7c31bbe8` to `(http.host eq "dapulo.com" and http.request.uri.path in {"/" "/en" "/en/"})`. Dashboard confirms Active and two total free rules. This public-language change leaves the separately approved app nonce rule intact and excludes API/ERP. Historical root-only statements below describe the earlier approval. The public Korean/English pages contain no authenticated app data.
+
 User request: after the central video ends, shift it left and show a mobile-width real dapulo.com homepage on the right; keep individual replay and homepage scrolling independent.
 
 ## Original production blocker
