@@ -4,11 +4,23 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `bb6ded2741c8945125400d14f3108a288c6ac276`, successful [Pages run 41342791226](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41342791226).
+Final deployed commit: `1ff3eaa7feb1497bdb4379de2e2558aaa2c1057c`, successful [Pages run 41343753757](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41343753757).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest follow-up — per-tablet replay
+## Latest follow-up — real mobile homepage beside video
+
+On natural video end, the video moves left and the actual mobile-width https://dapulo.com/ homepage opens on the right. Personal replay keeps that homepage mounted with its scroll intact; central reset restores video-only viewing. Narrow phone portrait stacks the panels. Fullscreen now encloses both.
+
+The original live homepage blocked framing via SAMEORIGIN/frame-ancestors self. After the user's explicit approval, added exactly one Cloudflare Free-plan response-header rule for host dapulo.com and path /, allowing self + https://junhoflow.github.io and removing root X-Frame-Options. Rule ID e25350803a7746ae9432bd3f7c31bbe8. No Dapulo app/Worker/DB deployment. Live HEAD verification confirms /app, /app/login, /en and /erp still have SAMEORIGIN/self. Existing Wrangler OAuth read failed 403/9109, so the existing signed-in Cloudflare browser was used without creating any credential. Exact policy, scope and rollback are in HOMEPAGE_EMBED_APPROVAL.md and DAPULO_HOMEPAGE_EMBED_RULE.json.
+
+Actual Pages Chrome + Playwright WebKit `tests/homepage-real.mjs` PASSED with the REAL homepage (no route substitution, copy, proxy or header stripping): actual Korean h1, images/fonts, iframe width 388, mobile media query true, document heights 3184/3055, independent scroll to 650, scroll survives personal replay and its next ending, exactly one homepage document load per viewer, combined Chrome fullscreen, four viewport layouts without outer horizontal overflow, and central reset.
+
+Local synthetic layout/scroll tests also passed on both engines, with fixture clearly labelled as not live dapulo.com. First fixture run failed due missing UTF-8 charset in the test-only page; corrected fixture and retained the first failure at /private/tmp/ppck-home-panel-fixture. Successful fixture runs: /private/tmp/ppck-home-panel-fixture-rerun and /private/tmp/ppck-home-panel-fullscreen-fixture. Actual deployed evidence: /private/tmp/ppck-real-home-deployed. Actual screenshots inspected; raw traces remain local. One Chrome full-page capture after viewport resize shows a stitched header artifact at its bottom; normal 1180 screenshot and WebKit/other sizes are clean, and no duplicate DOM was introduced.
+
+JS syntax, protocol tests 3/3, and diff check pass. Physical iPad/Android, native iPadOS fullscreen, venue Wi-Fi, and navigating from homepage into app/login are not claimed verified. English navigation (/en) is outside the approved root-only embedding exception; Open site opens the full website separately when needed.
+
+## Earlier follow-up — per-tablet replay
 
 First viewing remains controlled by the presenter. At the final held video frame, a centered Watch again button allows each viewer to start/repeat their own playback, without publishing any central control command. Other tablets keep their own positions. Reconnect/visibility/clock updates for the same presenter command do not interrupt personal playback. A newer signed central reset/restart still applies to every screen.
 

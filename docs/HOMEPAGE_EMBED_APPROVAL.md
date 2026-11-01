@@ -42,7 +42,7 @@ The user explicitly approved “허용하고 실제 홈페이지까지 완성”
 
 Dapulo AGENTS.md says: “Production deployment and remote DB migrations require separate approval.” The initial authorization covered this separate GitHub Pages demo, not a Dapulo production security-header exception. That separate explicit approval has now been received and the rule was applied. The security-audit skill was used for source-based guidance; it does not itself require user approval here.
 
-PPCK UI deployment can now proceed through the existing feature-branch Pages workflow; actual live iframe content/scroll verification remains required.
+PPCK UI deployment can now proceed through the existing feature-branch Pages workflow; actual live iframe content/scroll verification has passed in Chrome and WebKit (see TEST_REPORT_2026-11-02.md).
 
 ## Validation after approval
 
@@ -53,3 +53,7 @@ PPCK UI deployment can now proceed through the existing feature-branch Pages wor
 5. Record deployment/rule identifiers, first failures and actual results in HANDOFF.md.
 
 References: https://www.w3.org/TR/CSP/ and https://developers.cloudflare.com/pages/configuration/headers/ .
+
+## Completed verification
+
+PPCK Pages run 41343753757 succeeded at commit 1ff3eaa7feb1497bdb4379de2e2558aaa2c1057c. Actual homepage rendering, 388px mobile viewport, fonts/images, independent scroll, repeated video playback without iframe reload, combined fullscreen and central reset passed in Chrome/WebKit. Physical device and venue Wi-Fi checks are still required for the event.
