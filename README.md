@@ -47,3 +47,7 @@ Official references: [Pages limits](https://docs.github.com/en/pages/getting-sta
 ## Tablet touch-scroll update
 
 The homepage frame is shown/sized before navigation, uses an explicit native scroll viewport, and is no longer loaded under an inert/transforming ancestor. Entry CSS and frame modules carry release query versions to avoid stale tablet caches. If testing an already-open page, reload the latest entry before running the video. Actual trusted Chrome mobile touch-swipe emulation and WebKit wheel input passed; physical iPad/Android verification remains separate. Earlier scrollTo-based tests alone did not establish native gesture behavior.
+
+## iPad homepage browsing
+
+iPad native browser fullscreen is exited when the video ends, before the homepage loads. The split stays large in a normal-document viewport, with an Exit large view control. Large view can be reopened without native fullscreen while browsing. Initial video fullscreen remains available; Android/Galaxy keeps native fullscreen after the end. This is a device-specific workaround for the user-confirmed iPad fullscreen touch-scroll failure.

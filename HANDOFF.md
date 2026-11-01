@@ -2,7 +2,16 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
-## Latest fix — tablet finger scrolling
+## Latest iPad fullscreen-only correction
+
+User physically confirmed Galaxy Tab scrolling now works; iPad scrolling fails specifically in native browser fullscreen. This supersedes the earlier pending generic device feedback.
+
+- iPad detection handles both iPad user-agent and modern desktop-site MacIntel + multitouch. On first video end, exit Safari native document fullscreen before loading the homepage, then retain the same side-by-side layout in a large normal-document viewport. Local repeats stay inline. Close button exits Large view; the footer Large view button reopens it without re-entering native fullscreen. Normal initial video fullscreen remains available. Android/Galaxy keeps its existing native fullscreen behavior.
+- Added device-gated CSS large view; no root scroll lock, no Dapulo setting/source/API/Worker/DB change. Entry assets carry ipad7 cache versions. Backward-compatible handling for older cached HTML without the new close button.
+- Pre-deployment local PPCK code mounted at its approved Pages origin (own assets only; real dapulo.com response unchanged). tests/ipad-browsing-view.mjs PASSED Chrome iPad branch native fullscreen exit + trusted finger swipe260, WebKit iPad branch exit + wheel650, Android branch stays native fullscreen + finger swipe259. Both iPad branches can close/reopen Large view without native fullscreen and keep scroll during personal replay. Real iPad hardware is not simulated or claimed tested; detection/engine branch is simulated. Evidence /private/tmp/ppck-ipad7-predeploy.
+- Final load order ensures iPad homepage navigation begins only after native fullscreen exits. Syntax/diff/protocol checks and actual deployed branch QA are next.
+
+## Previous tablet finger-scrolling fix
 
 User reported that the right homepage could not be scrolled with a tablet finger. The earlier tests used `window.scrollTo`, which verified scroll state but NOT real native gestures. Do not use them as evidence of physical touch input.
 

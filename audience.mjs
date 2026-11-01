@@ -1,4 +1,4 @@
-import { showHomepage, hideHomepage } from './homepage-panel.mjs?v=20261102-touch6';
+import { showHomepage, hideHomepage, isIPad, toggleExpandedHomepage } from './homepage-panel.mjs?v=20261102-ipad7';
 import { config } from './config.mjs';
 import { connect, publish } from './connection.mjs';
 import { topic, verify, validState, positionAt, clockSample, now } from './protocol.mjs';
@@ -105,6 +105,7 @@ el('sound').onclick = () => {
   video.muted = muted; report();
 };
 el('full').onclick = async () => {
+  if (isIPad && el('presentation').classList.contains('home-open')) { toggleExpandedHomepage(); return; }
   try {
     const screen = el('presentation');
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -115,7 +116,7 @@ el('full').onclick = async () => {
   } catch { status('Full screen unavailable · Rotate your tablet for a larger view'); }
 };
 function finish() {
-  showHomepage();
+  showHomepage({ nativeVideoFullscreen: video.webkitDisplayingFullscreen === true });
   // Older Safari's native video fullscreen cannot display HTML siblings. Return inline for the website panel.
   if (video.webkitDisplayingFullscreen) video.webkitExitFullscreen?.();
   clearTimeout(timer); phase = 'ended'; video.pause();
