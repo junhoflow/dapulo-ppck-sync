@@ -2,7 +2,16 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
-## Latest follow-up — individual replay after central first viewing
+## Latest follow-up — video ending reveals the real mobile homepage
+
+- Requested split UI implemented: video shifts left at first end, right mobile-width iframe opens dapulo.com, personal replay leaves iframe mounted/scroll intact. Phone portrait stacks the homepage below video. Combined fullscreen now includes both panels; native-video-only Safari fallback returns inline at end so HTML panel remains reachable.
+- homepage-panel.mjs owns lazy load/show/hide. Exact live homepage URL only, no proxy/header stripping. sandbox blocks top-level navigation and device permissions; Open site link remains available.
+- Local Chrome/WebKit synthetic layout tests PASS: lazy request, natural end split (including Chrome fullscreen), independent scrolling/replay with only one iframe load, 1180×820/1024×768/844×390/390×844 layouts, central reset. Synthetic page is conspicuously labelled, not claimed to be live dapulo.com. Evidence /private/tmp/ppck-home-panel-fixture-rerun and /private/tmp/ppck-home-panel-fullscreen-fixture. First test failed because the test page omitted charset; fixed fixture UTF-8 and preserved /private/tmp/ppck-home-panel-fixture.
+- Real homepage initially blocked by SAMEORIGIN + frame-ancestors self. User explicitly approved the exact public-root header exception on 2026-11-02 (“허용하고 실제 홈페이지까지 완성”).
+- Applied Cloudflare response-header Transform Rule e25350803a7746ae9432bd3f7c31bbe8, exact host dapulo.com/path /. Root allows self + https://junhoflow.github.io; /app, /app/login, /en, /erp retain original self/SAMEORIGIN protection. Free plan: one rule of ten; no app/Worker/DB deployment. Existing Wrangler OAuth read failed 403/9109, used signed-in browser without new credentials. Details/rollback: docs/HOMEPAGE_EMBED_APPROVAL.md and exact docs/DAPULO_HOMEPAGE_EMBED_RULE.json.
+- JS syntax, protocol tests 3/3 and diff check pass. PPCK deployment and real iframe QA are next at this checkpoint.
+
+## Previous individual replay follow-up
 
 - First viewing remains controlled by the signed presenter command. No audience replay button is shown before the first end.
 - At the last video frame, a centered English **Watch again** button appears. It starts only that tablet from zero and can be used repeatedly; no central control message is published.

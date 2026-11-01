@@ -1,3 +1,4 @@
+import { showHomepage, hideHomepage } from './homepage-panel.mjs';
 import { config } from './config.mjs';
 import { connect, publish } from './connection.mjs';
 import { topic, verify, validState, positionAt, clockSample, now } from './protocol.mjs';
@@ -105,7 +106,7 @@ el('sound').onclick = () => {
 };
 el('full').onclick = async () => {
   try {
-    const screen = el('screen');
+    const screen = el('presentation');
     if (document.fullscreenElement) await document.exitFullscreen();
     else if (screen.requestFullscreen) await screen.requestFullscreen();
     else if (screen.webkitRequestFullscreen) screen.webkitRequestFullscreen();
@@ -114,6 +115,9 @@ el('full').onclick = async () => {
   } catch { status('Full screen unavailable · Rotate your tablet for a larger view'); }
 };
 function finish() {
+  showHomepage();
+  // Older Safari's native video fullscreen cannot display HTML siblings. Return inline for the website panel.
+  if (video.webkitDisplayingFullscreen) video.webkitExitFullscreen?.();
   clearTimeout(timer); phase = 'ended'; video.pause();
   // Seek inside the final sample so browsers retain a decoded frame, including late recovery.
   video.currentTime = Math.max(0, video.duration - 0.001);
@@ -145,6 +149,7 @@ async function applyState() {
   const current = state, token = ++revision; clearTimeout(timer); video.pause();
   appliedSeq = current.seq; error = '';
   if (current.mode === 'waiting') {
+    hideHomepage();
     video.currentTime = 0; startError = null; phase = 'ready';
     status('Ready · Waiting for the presenter'); report(); return;
   }
@@ -153,6 +158,7 @@ async function applyState() {
     status('Paused'); report(); return;
   }
   video.currentTime = positionAt(current, presenterNow(), video.duration);
+  if (video.currentTime < video.duration - 0.05) hideHomepage();
   function start() {
     if (token !== revision) return;
     const left = current.at - presenterNow();

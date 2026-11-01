@@ -1,0 +1,17 @@
+{
+  "description": "PPCK: permit owner GitHub Pages to embed only the public Dapulo homepage",
+  "expression": "(http.host eq \"dapulo.com\" and http.request.uri.path eq \"/\")",
+  "action": "rewrite",
+  "action_parameters": {
+    "headers": {
+      "content-security-policy": {
+        "operation": "set",
+        "value": "object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://junhoflow.github.io"
+      },
+      "x-frame-options": {
+        "operation": "remove"
+      }
+    }
+  },
+  "enabled": true
+}
