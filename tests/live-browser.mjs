@@ -81,6 +81,9 @@ try {
   await audience[0].page.locator('#full').click();
   await expect.poll(() => audience[0].page.evaluate(() => Boolean(document.fullscreenElement))).toBe(true);
   await audience[0].page.keyboard.press('Escape');
+  // Headless Chrome can consume Escape without leaving the browser fullscreen state.
+  await audience[0].page.evaluate(async () => { if (document.fullscreenElement) await document.exitFullscreen(); });
+  await expect.poll(() => audience[0].page.evaluate(() => Boolean(document.fullscreenElement))).toBe(false);
   results.scenarios.push('Chrome full screen entered through actual button click');
   // Responsive checks use viewport changes, not physical tablet claims.
   for (const size of [{ width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1024, height: 768 }, { width: 1180, height: 820 }]) {

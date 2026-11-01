@@ -33,7 +33,7 @@ async function send(mode, restart = false, preload = false) {
   if (!key || !connected || busy) return;
   busy = true; render();
   if (preload) {
-    try { await publish(client, `${topic}/preload`, await sign({ kind: 'preload', issuedAt: now() }, key)); el('sent').textContent = '사전 로딩 확인 명령 전송 완료'; }
+    try { await publish(client, `${topic}/preload`, await sign({ kind: 'preload', issuedAt: now() }, key), true); el('sent').textContent = '사전 로딩 확인 명령 전송 완료'; }
     catch (e) { el('sent').textContent = e.message; }
     finally { busy = false; render(); }
     return;

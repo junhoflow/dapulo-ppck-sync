@@ -6,6 +6,7 @@ if (!config.hasAudio) { el('sound').textContent = 'Silent demo'; el('sound').dis
 const id = crypto.randomUUID().replaceAll('-', '').slice(0, 12);
 el('device').textContent = `Screen ${id.slice(0, 4).toUpperCase()}`;
 let client, loaded = false, ready = false, loading = false, download = 0, blobURL;
+let preloadRequest;
 let state, appliedSeq = 0, timer, revision = 0, phase = 'loading', error = '', startError = null;
 let samples = [], offset = 0, rtt = null, clockAt = 0;
 const pings = new Map();
@@ -22,6 +23,9 @@ function report() {
     rtt: synced() ? Math.round(rtt) : null, synced: synced(), startError,
     visible: !document.hidden, seq: appliedSeq, position: video.currentTime,
     muted: video.muted, width: video.videoWidth, height: video.videoHeight }).catch(() => {});
+}
+function applyPreload() {
+  if (preloadRequest && synced() && Math.abs(presenterNow() - preloadRequest.issuedAt) < 10000 && !loaded) loadVideo();
 }
 function ping() {
   if (!client?.connected) return;
@@ -168,8 +172,8 @@ try {
   client = connect(id, onConnection);
   client.on('message', async (path, bytes) => {
     const received = now(), msg = await verify(bytes.toString()); if (!msg) return;
-    if (path === `${topic}/preload` && msg.kind === 'preload' && synced() && Math.abs(presenterNow() - msg.issuedAt) < 10000) {
-      if (!loaded) loadVideo(); report();
+    if (path === `${topic}/preload` && msg.kind === 'preload' && Number.isFinite(msg.issuedAt)) {
+      preloadRequest = msg; applyPreload(); report();
     } else if (path === `${topic}/state` && validState(msg)) {
       if (state && msg.seq <= state.seq) return;
       state = msg;
@@ -182,7 +186,7 @@ try {
       samples = samples.filter(s => received - s.received < 20000); samples.push(sample);
       const best = samples.reduce((a, b) => a.rtt < b.rtt ? a : b);
       offset = best.offset; rtt = best.rtt; const first = !synced(); clockAt = received;
-      if (first || phase === 'scheduled') await applyState(); report();
+      applyPreload(); if (first || phase === 'scheduled') await applyState(); report();
     }
   });
 } catch (e) { status(e.message); }

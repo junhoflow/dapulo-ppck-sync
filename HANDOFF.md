@@ -32,3 +32,10 @@ Updated: 2026-11-02 (Asia/Seoul). Implementation complete; deployment and deploy
 - First deployed QA **failed** at offline detection: Playwright setOffline left the already-established WebSocket connected; conn stayed Live connection for 20 seconds. First failure and traces retained `/private/tmp/ppck-deployed-run1`.
 - Fix: connection.mjs now explicitly ends MQTT on the browser offline event and reconnects on online, and bounds publish acknowledgement waits at 10 seconds. Also fixed a retry-button visibility edge case after presenter-triggered reloading.
 - Next: redeploy runtime fixes, rerun affected deployed tests; finish reload/fullscreen/responsive verification; final handoff.
+
+## Checkpoint 3 — recovery pass and preload race
+
+- Run `/private/tmp/ppck-deployed-run2` PASSED on deployed 1418cc2: Chrome + WebKit readiness, restart x3, pause/resume/end, explicit offline/reconnect retained reset, reload and fresh user gesture, Chrome fullscreen. Software position spreads 3.38 / 9.42 / 14.24 ms; no page errors. Responsive captures were found still in headless fullscreen after Escape; added an explicit fullscreen-exit assertion and separate responsive test, so those first screenshots are not used as normal-layout evidence.
+- Extended run `/private/tmp/ppck-scale-run1` intentionally injected one 503 video response. FAILED because the presenter preload request could be issued before that viewer finished subscribing / clock synchronization; the unretained request was lost or ignored. First failure/screenshots/traces preserved.
+- Fix: retain only the latest signed preload request with a 10-second receiver expiry; queue it until clock synchronization rather than discarding it. It remains independent of the playback timeline. Normal automatic video loading is unchanged.
+- Next: redeploy this narrow preload fix, run affected six-screen/auth/preload scenario and independent normal-viewport QA. Prior passed play/pause/reconnect behavior is unchanged.
