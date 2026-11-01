@@ -51,3 +51,5 @@ The homepage frame is shown/sized before navigation, uses an explicit native scr
 ## iPad homepage browsing
 
 iPad native browser fullscreen is exited when the video ends, before the homepage loads. The split stays large in a normal-document viewport, with an Exit large view control. Large view can be reopened without native fullscreen while browsing. Initial video fullscreen remains available; Android/Galaxy keeps native fullscreen after the end. This is a device-specific workaround for the user-confirmed iPad fullscreen touch-scroll failure.
+
+The real homepage’s **내 산호 키우러 가기** continues into the real Dapulo app inside the same right mobile frame. The separately approved app-only edge rule preserves all nonce/script protections; see docs/APP_EMBED_APPROVAL.md. Anonymous character selection/next/back/reload are verified on desktop Chrome and WebKit. Embedded social login, physical camera/mic and physical tablet app sessions remain unverified.

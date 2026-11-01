@@ -1,0 +1,17 @@
+{
+  "description": "PPCK app embed — preserve dynamic CSP nonce and allow only owner Pages",
+  "expression": "(http.host eq \"dapulo.com\" and (http.request.uri.path eq \"/app\" or starts_with(http.request.uri.path, \"/app/\")) and http.response.headers[\"content-security-policy\"][0] contains \"frame-ancestors 'self';\")",
+  "action": "rewrite",
+  "action_parameters": {
+    "headers": {
+      "content-security-policy": {
+        "operation": "set",
+        "expression": "join(split(http.response.headers[\"content-security-policy\"][0], \"frame-ancestors 'self';\", 2), \"frame-ancestors 'self' https://junhoflow.github.io;\")"
+      },
+      "x-frame-options": {
+        "operation": "remove"
+      }
+    }
+  },
+  "enabled": true
+}

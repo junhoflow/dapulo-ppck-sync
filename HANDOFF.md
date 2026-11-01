@@ -2,6 +2,10 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
+## Active app-in-panel follow-up
+
+User explicitly chose continuing the actual /app inside the right mobile panel. Live /app response blocks foreign frames with X-Frame-Options SAMEORIGIN and frame-ancestors self; nonce-based script CSP must be preserved. Prepared dedicated app-path-only dynamic header rule in docs/DAPULO_APP_EMBED_RULE.json; keep root rule and API/ERP protections unchanged. Uses documented Cloudflare split/join so only frame-ancestors changes and per-response nonce remains intact. User explicitly approved action-time rule application (“허용하고 적용”). Applied and Active: Cloudflare rule 7cba8f1a7a6b426f9d767e9ae99001da, PPCK app embed — preserve CSP nonce. Two free Transform Rules total. Initial failure evidence /private/tmp/ppck-app-navigation-before-locator-fixed; first shortened-label locator failure preserved separately. Pending: actual CTA/guest interaction Chrome/WebKit tests and deploy scoped PPCK frame permission update (app8).
+
 ## Latest iPad fullscreen-only correction
 
 User physically confirmed Galaxy Tab scrolling now works; iPad scrolling fails specifically in native browser fullscreen. This supersedes the earlier pending generic device feedback.

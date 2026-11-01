@@ -1,4 +1,4 @@
-import { showHomepage, hideHomepage, isIPad, toggleExpandedHomepage } from './homepage-panel.mjs?v=20261102-ipad7';
+import { showHomepage, hideHomepage, isIPad, toggleExpandedHomepage } from './homepage-panel.mjs?v=20261102-app8';
 import { config } from './config.mjs';
 import { connect, publish } from './connection.mjs';
 import { topic, verify, validState, positionAt, clockSample, now } from './protocol.mjs';

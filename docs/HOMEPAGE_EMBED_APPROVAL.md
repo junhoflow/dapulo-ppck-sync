@@ -1,5 +1,7 @@
 # Public homepage embedding — approved production exception (APPLIED)
 
+Later 2026-11-02 follow-up: the user separately approved embedding the actual /app too. A separate app rule now preserves its dynamic nonce policy; see [APP_EMBED_APPROVAL.md](APP_EMBED_APPROVAL.md). The historical root-only boundary below describes the earlier approval, not the current app rule.
+
 User request: after the central video ends, shift it left and show a mobile-width real dapulo.com homepage on the right; keep individual replay and homepage scrolling independent.
 
 ## Original production blocker
