@@ -4,11 +4,17 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `924d3d617d680d0041ddf0bbbe4d83b425ab1134`, successful [Pages run 41346974553](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41346974553).
+Final deployed commit: `1b21af22d0e905c81690dbde302ae4e30bf1b0de`, successful [Pages run 41347854601](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41347854601).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest English navigation and presentation appearance
+## Latest English by default
+
+The user requested the first revealed homepage default to English. Lazy frame URL and toolbar Open site both start at https://dapulo.com/en; cache version en10. No new Cloudflare policy or Dapulo app/Worker/DB change. Video-first and end-to-split timing unchanged.
+
+Actual deployed en10 tests/english-presentation.mjs PASSED Chrome + WebKit: without clicking a language link, English h1 appears and iframe src is /en; Open site href also /en. KOR/ENG round trip, English hero→actual app, English touch260/wheel600 scroll, zero-inset fullscreen, black backgrounds/exact app icon and three responsive layouts pass. Evidence /private/tmp/ppck-en10-deployed; actual responses unchanged, MQTT isolated, local synthetic ended event only. Other existing homepage harness expectations were updated to English but not rerun for this URL-only follow-up. Syntax/protocol3/3/diff checks pass. Physical tablet verification is not claimed.
+
+## Previous English navigation and presentation appearance
 
 User requested ENG work inside the right frame, remove the initial navy fullscreen band, use black split margins, and put the actual app icon before Dapulo. Expanded only the existing public-home rule to exact /, /en and /en/; the app nonce rule and API/ERP are unchanged. /en200 now allows PPCK; /en/308 redirects to /en with the same frame policy. Still two free rules. No Dapulo app assets/Worker/DB deployment.
 

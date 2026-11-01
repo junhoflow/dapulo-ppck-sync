@@ -2,9 +2,9 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
-## Active English-default follow-up
+## Completed English-default follow-up
 
-User requested English be the default homepage. Changed homepage-panel.mjs lazy initial URL and toolbar Open site href to https://dapulo.com/en, preserving language switching, video-first entry, split timing and app/fullscreen behavior. Cache entry en10, config2026-11-02.10. Updated existing homepage test expectations/fixtures to the English initial route; English roundtrip test still verifies Korean switching. No Cloudflare/Dapulo policy or source changes needed. Next: deploy, actual public Chrome/WebKit English default + KOR/ENG/app verification, final docs.
+User requested English be the default homepage. Changed homepage-panel.mjs lazy initial URL and toolbar Open site href to https://dapulo.com/en, preserving language switching, video-first entry, split timing and app/fullscreen behavior. Cache entry en10, config2026-11-02.10. Updated existing homepage test expectations/fixtures to the English initial route; English roundtrip test still verifies Korean switching. No Cloudflare/Dapulo policy or source changes needed. Commit1b21af22d0e905c81690dbde302ae4e30bf1b0de deployed successfully in Pages run41347854601. Actual https://junhoflow.github.io/dapulo-ppck-sync/?v=en10 tests/english-presentation.mjs PASSED Chrome/WebKit: initial frame src/en and English heading without language click, Open site/en, KOR/ENG round trip, actual app CTA, scroll touch260/wheel600, zero-inset fullscreen, black background/icon and three layout sizes. Evidence /private/tmp/ppck-en10-deployed; no live central commands. Other homepage harness expectations were updated but not rerun for this URL-only change. Syntax/protocol3/3/diff checks passed. No code/deployment work remains; physical tablet validation remains unclaimed.
 
 ## Latest English/homepage/presentation appearance follow-up
 
