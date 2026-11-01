@@ -4,11 +4,25 @@ Audience: https://junhoflow.github.io/dapulo-ppck-sync/
 
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
-Final deployed commit: `e5dda4866e6ca55eca4f4a065eec9e02ba040058`, successful [Pages run 41345187475](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41345187475).
+Final deployed commit: `f704f8f16c544a7e264ff93debdd3f7b31366bed`, successful [Pages run 41345745012](https://github.com/junhoflow/dapulo-ppck-sync/actions/runs/41345745012).
 
 Working / deployed branch: `codex/ppck-completion-20261102`. No main merge or force-push.
 
-## Latest tablet touch-scroll fix
+## Latest iPad native-fullscreen workaround
+
+User physically confirmed Galaxy Tab scrolling works, but iPad fails specifically in native fullscreen. On iPad video end, exit native browser fullscreen before loading the real homepage and use a CSS large normal-document split view. Initial video fullscreen remains available; subsequent homepage Large view does not enter native fullscreen. Close control exits Large view. Android keeps native fullscreen. No Dapulo production source/settings/Worker/DB change. Cache version: ipad7.
+
+Actual deployed entry https://junhoflow.github.io/dapulo-ppck-sync/?v=ipad7 passed `tests/ipad-browsing-view.mjs`:
+
+| Simulated device branch / engine | Fullscreen after ending | Real homepage input | Result |
+| --- | --- | --- | --- |
+| iPad detection / Chrome | Native exits; CSS large view | Trusted CDP swipe, scrollY259 | PASS |
+| iPad detection / Playwright WebKit | Native exits; CSS large view | Mouse wheel, scrollY650 | PASS |
+| Android / Chrome | Native fullscreen retained | Trusted CDP swipe, scrollY260 | PASS |
+
+Replay preserves scroll. iPad Close/Large view controls stay outside native fullscreen. Evidence /private/tmp/ppck-ipad7-deployed; WebKit screenshot visually inspected. MQTT is isolated and a synthetic local ended event opens the panel, avoiding commands to real user tablets. Actual dapulo.com response is not substituted or modified. iPad detection is simulated on desktop engines; this is not a real iPadOS touch/fullscreen test. Physical iPad verification has been requested and remains pending. Galaxy success is the user's report, not an agent-operated hardware test.
+
+## Previous tablet touch-scroll fix
 
 The user reported finger scrolling failed on both iPad and Android. Earlier window.scrollTo-based tests proved scroll-state changes, not native finger input; that gap is explicitly acknowledged.
 
@@ -18,7 +32,7 @@ Actual input results (real homepage, not fake scrollTo): WebKit wheel0→650 pas
 
 Initial and after-test Chrome desktop wheel checks intermittently stayed at0; aggregate runs are preserved as failed, not called all-pass. A separate focused event-instrumented Chrome wheel case advanced650. No deterministic explanation of that intermittent first desktop wheel is claimed. Evidence: /private/tmp/ppck-scroll-input-before, /private/tmp/ppck-scroll-input-after, /private/tmp/ppck-scroll-input-isolated, /private/tmp/ppck-scroll-wheel-event-diagnosis. An auxiliary unisolated diagnostic lost the panel to a retained central reset, so it is excluded from scroll conclusions. The final diagnostic harness uses separate browsers, disconnects only the test page's MQTT and opens the panel via a local synthetic ended event, avoiding interference with user-controlled tablets. Real homepage and real gesture input remain untouched.
 
-Physical iPad/Android confirmation was requested from the user and is pending. Do not claim the reported physical-device defect is confirmed resolved until that reply arrives. Reopen the latest versioned URL and run the first video to reveal the homepage before checking finger scroll.
+This earlier generic device-confirmation status is superseded by the latest iPad section: user reports Galaxy works, iPad native fullscreen fails; revised iPad verification is pending.
 
 ## Earlier follow-up — real mobile homepage beside video
 
