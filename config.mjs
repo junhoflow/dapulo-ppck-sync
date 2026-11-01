@@ -10,5 +10,5 @@ export const config = {
   "broker": "wss://broker.emqx.io:8084/mqtt",
   "video": "./27233.mp4",
   "hasAudio": false,
-  "version": "2026-11-02.2"
+  "version": "2026-11-02.3"
 };

@@ -7,6 +7,7 @@ const id = crypto.randomUUID().replaceAll('-', '').slice(0, 12);
 el('device').textContent = `Screen ${id.slice(0, 4).toUpperCase()}`;
 let client, loaded = false, ready = false, loading = false, download = 0, blobURL;
 let preloadRequest;
+let localReplay = false, localReplaySeq = null;
 let state, appliedSeq = 0, timer, revision = 0, phase = 'loading', error = '', startError = null;
 let samples = [], offset = 0, rtt = null, clockAt = 0;
 const pings = new Map();
@@ -116,12 +117,31 @@ function finish() {
   clearTimeout(timer); phase = 'ended'; video.pause();
   // Seek inside the final sample so browsers retain a decoded frame, including late recovery.
   video.currentTime = Math.max(0, video.duration - 0.001);
-  el('ready').hidden = true; status('Demo complete'); report();
+  el('ready').hidden = true; el('replay').hidden = false; el('replay').disabled = false;
+  status('Demo complete'); report();
 }
 video.addEventListener('ended', finish);
+el('replay').onclick = async () => {
+  if (phase !== 'ended' || !loaded || !ready) return;
+  const token = ++revision; clearTimeout(timer);
+  localReplay = true; localReplaySeq = state?.seq; error = '';
+  el('replay').hidden = true; video.currentTime = 0; phase = 'local-replay';
+  try {
+    await video.play();
+    if (token !== revision) return;
+    status('Replaying on this screen'); report();
+  } catch {
+    if (token !== revision) return;
+    error = 'Replay blocked'; finish();
+    status('Tap Watch again to allow playback');
+  }
+};
 async function applyState() {
   if (!state || !ready || !loaded || !synced()) return;
   if (Math.abs(presenterNow() - state.issuedAt) > 12 * 3600000) return;
+  // Reconnects and visibility/clock refreshes of the same central command must not interrupt a personal replay.
+  if (localReplay && localReplaySeq === state.seq) return;
+  localReplay = false; localReplaySeq = null; el('replay').hidden = true;
   const current = state, token = ++revision; clearTimeout(timer); video.pause();
   appliedSeq = current.seq; error = '';
   if (current.mode === 'waiting') {
@@ -195,5 +215,5 @@ document.addEventListener('visibilitychange', () => {
   report();
 });
 video.addEventListener('waiting', () => { if (ready && state?.mode === 'playing') { phase = 'buffering'; report(); } });
-video.addEventListener('playing', () => { phase = 'playing'; report(); });
+video.addEventListener('playing', () => { phase = localReplay ? 'local-replay' : 'playing'; report(); });
 loadVideo();

@@ -2,7 +2,15 @@
 
 Updated: 2026-11-02 (Asia/Seoul).
 
-## Latest requested behavior — 2026-11-02
+## Latest follow-up — individual replay after central first viewing
+
+- First viewing remains controlled by the signed presenter command. No audience replay button is shown before the first end.
+- At the last video frame, a centered English **Watch again** button appears. It starts only that tablet from zero and can be used repeatedly; no central control message is published.
+- A local replay survives clock refresh, foreground transitions and MQTT reconnect of the same command. A newer presenter command still controls all screens, including reset/restart of a personal replay.
+- Local Chrome + WebKit `tests/individual-replay.mjs` PASSED: initial presenter-only playback, center button, other viewer stays paused at the end, staggered independent replay (3.674 sec vs 0.013 sec), local repeat through offline/reconnect and visibility event, replay button returns at end, new central reset overrides local playback. Screenshot inspected. Evidence: /private/tmp/ppck-replay-local.
+- Syntax checks, protocol tests 3/3 and diff check pass. Deployment and affected deployed QA pending at this checkpoint.
+
+## Earlier first/last-frame change — 2026-11-02
 
 User requested the video itself remain visible throughout: first frame paused on entry, play without a 3-2-1 screen, final video frame held at the end. This supersedes the earlier waiting/countdown/thank-you flow below.
 
