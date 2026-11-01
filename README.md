@@ -1,6 +1,7 @@
 # Dapulo PPCK synchronized tablet demo
 
-Audience: https://junhoflow.github.io/dapulo-ppck-sync/  
+Audience: https://junhoflow.github.io/dapulo-ppck-sync/
+
 Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
 
 ## Presentation day (five steps)
@@ -19,11 +20,13 @@ Only ECDSA P-256 signed states and clock replies matching `config.mjs` are accep
 
 The public broker has no availability SLA and no private topic ACL. An adversary can interfere with availability or spoof audience status counts; those reports are operational indicators, not authenticated device identities. No personal data is requested: only random per-page device IDs, media/visibility/readiness and timing information are published. Freshness/sequence checks reject duplicate or older states within a page; retained commands expire after 12 hours. A new key/session should be generated for a later event. Do not distribute the private key to the audience or commit it to Git.
 
+Detailed tested results and limitations: [verification report](docs/TEST_REPORT_2026-11-02.md).
+
 ## Synchronization and recovery
 
 The presenter signs a timeline with a common start time three seconds in the future. Each tablet performs ping/pong clock estimation against the presenter and selects the smallest recent RTT sample. The video is local in memory before readiness. Reports include RTT, the applied command sequence, and the difference between the scheduled time and `video.play()` invocation. These are not measurements of panel refresh, frame presentation, or audible output. No frame-perfect guarantee is made; Wi-Fi asymmetry, browser scheduling, decoding and screen refresh affect actual results. Test each physical device before the pitch.
 
-The newest signed state is MQTT-retained. Reconnection subscribes again, resynchronizes clocks, and applies the latest play/pause/reset state. Late play commands seek into the common timeline; a finished timeline shows the ending rather than restarting. Refresh downloads from the browser cache/network again and requires a new user gesture; **ready is never persisted across reloads**. The start/restart buttons require every currently reported tablet to be ready, synchronized and visible. Dead presence expires after 15 seconds. Presence is unretained and reported every two seconds. Keep a separate count of the tablets you actually handed out.
+The newest signed playback state is MQTT-retained. A separate retained preload request is accepted for only 10 seconds and waits for clock synchronization; it never changes the playback timeline. Reconnection subscribes again, resynchronizes clocks, and applies the latest play/pause/reset state. Late play commands seek into the common timeline; a finished timeline shows the ending rather than restarting. Refresh downloads from the browser cache/network again and requires a new user gesture; **ready is never persisted across reloads**. The start/restart buttons require every currently reported tablet to be ready, synchronized and visible. Dead presence expires after 15 seconds. Presence is unretained and reported every two seconds. Keep a separate count of the tablets you actually handed out.
 
 ## Media verification
 

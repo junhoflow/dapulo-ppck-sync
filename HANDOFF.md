@@ -1,17 +1,44 @@
-# Dapulo PPCK synchronization — handoff
+# Dapulo PPCK synchronization — final handoff
 
-Updated: 2026-11-02 (Asia/Seoul). Implementation complete; deployment and deployed QA pending.
+Updated: 2026-11-02 (Asia/Seoul).
 
-- Repository: junhoflow/dapulo-ppck-sync, original main `18de2d552073e8bb302d9825db2ddf5af74f80da`.
-- Working branch: `codex/ppck-completion-20261102`; isolated checkout `/private/tmp/dapulo-ppck-sync`.
-- Original repo contained index.html, .nojekyll, .github/workflows/pages.yml only. No video, no separate admin page, no presence, no command authentication. Previous Actions run 41338050321 failed in configure-pages because Pages was disabled.
-- GitHub Pages source enabled as GitHub Actions through the signed-in repository settings.
-- Input found: `/Users/kimjunho/Downloads/Dapulo_12s_final_QR.mp4` (the file supplied in this chat; no 27233.mp4 input found).
-- Plan: preserve static GitHub Pages + public EMQX MQTT architecture; add signed presenter commands, clock estimation, retained state recovery, full video preload, separate admin page, presence dashboard and deployed browser tests.
-- Presenter private signing key exists only outside Git at `/private/tmp/Dapulo-PPCK-presenter-key.json`. DO NOT COMMIT, upload or log it. Public key is in config.mjs. Admin imports it locally; it is never sent to MQTT.
-- Tool setup: ffmpeg-static, mqtt, qrcode installed in `/private/tmp/ppck-tools`. ffprobe-static Darwin arm64 package is incorrectly x86_64 and cannot run on this Mac; use ffmpeg metadata instead.
-- Remaining: implement, encode video, narrow tests, review, commit/push feature branch, deploy branch with Actions, deployed Chromium/WebKit tests, finalize handoff and user guide.
-- Dapulo product checkout `/Users/kimjunho/vscode/dapulo` has extensive unrelated changes. No product files edited. No Dapulo production/Worker/DB changes authorized or needed.
+## Current status
+
+**Deployed and functional.** Audience: https://junhoflow.github.io/dapulo-ppck-sync/
+
+Presenter: https://junhoflow.github.io/dapulo-ppck-sync/admin.html
+
+Repository: https://github.com/junhoflow/dapulo-ppck-sync
+
+- Working/publishing branch: `codex/ppck-completion-20261102`.
+- Final deployed commit: `751619343922f1a2682fdeeb079446aacd9dfcc5`; successful Pages run `41340895589`. Final behavioral changes were tested at `0f38134e754f4c0d17a476ca4a6328dedbc0f17c`; subsequent 7516193 changes only center the short-landscape screen.
+- Pages source: GitHub Actions. github-pages environment permits main and this exact feature branch. No main push/merge, force-push, reset or existing-file deletion. Default main remains the original baseline; continue from the feature branch.
+- Separate isolated checkout: `/private/tmp/dapulo-ppck-sync`. All public source/video/tests/docs are pushed to the feature branch. Dapulo product checkout was not edited; no Dapulo app/Worker/DB changes.
+- **Video is silent:** the supplied Dapulo_12s_final_QR.mp4 already contains H.264 1080p/24 fps/12 seconds, with NO AUDIO STREAM. Published as lossless faststart remux 27233.mp4 (10,662,594 bytes). Do not claim audible playback. If sound is needed, obtain a source containing original audio, then replace/verify separately.
+- Presenter signing key must stay private. The durable local delivery copy is `/Users/kimjunho/.codex/visualizations/2026/11/01/01a1987d-62ff-71c2-bd8d-998300239acf/ppck-delivery/Dapulo-PPCK-presenter-key.json` (0600). It is **not in Git/Pages/MQTT**. Initial temp copy `/private/tmp/Dapulo-PPCK-presenter-key.json` is disposable only after preserving the durable copy. Admin imports locally and holds it in tab memory; a refreshed admin must import again.
+- Signed ECDSA commands, common-clock 3-second start, full video download, presence, pause/resume/restart/reset, independent preload, offline reconnect, refresh readiness and end screen are implemented.
+
+## Validation outcome
+
+- Syntax checks and `node --test tests/protocol.test.mjs`: 3/3 pass. git diff --check passes.
+- Actual Pages Chrome 156.0.8078.74 + Playwright WebKit 26.6: 1080p/12-second playback, repeat start, pause/resume, end, audience offline reconnect, reload + fresh gesture, fullscreen passed; no page errors. Three software position spreads 3.38/9.42/14.24 ms.
+- Six isolated Chrome audience contexts: pass, 8.50 ms sampled software position spread. Includes +120-second simulated clock offset correction, presenter reconnect with memory-held key, injected HTTP 503 recovery through preload, and actual public-broker forged command rejection.
+- Non-fullscreen normal-layout QA: 390×844 / 844×390 / 1024×768 / 1180×820, no horizontal overflow, Get ready and fullscreen buttons in viewport. Visual screenshots inspected; short-landscape centering verified after CSS deployment.
+- Deployed MP4 SHA-256 equals local upload: `bf15c8c59c43dfffed460fbe648d758c84d70ab98076f721182fa1be40930915`.
+- Raw first-failure screenshots/traces and successful reruns remain in `/private/tmp/ppck-deployed-run1`, `/private/tmp/ppck-deployed-run2`, `/private/tmp/ppck-scale-run1`, `/private/tmp/ppck-scale-run2`, `/private/tmp/ppck-responsive-final`, `/private/tmp/ppck-responsive-release`. Summaries/screenshots/QR/private key retained in the durable delivery folder above; no raw traces committed.
+- Full report: [docs/TEST_REPORT_2026-11-02.md](docs/TEST_REPORT_2026-11-02.md). Reproduction scripts under tests/ require an external installed Playwright module and local PPCK_KEY; scale script also needs MQTT_MODULE. Never run live controls during the presentation.
+
+## Presentation / remaining physical rehearsal
+
+1. Open admin.html, import private key, keep one presenter tab open.
+2. Open audience QR/URL on every tablet, wait for Fully downloaded, tap Get ready once.
+3. Keep all tablets foreground/unlocked; optionally enter fullscreen. Check connected/ready/synced counts against the actual tablets you handed out.
+4. Press 3초 뒤 전체 재생; use restart for playback from zero, pause/reset as needed.
+5. End screen appears automatically. Reloaded audience needs Get ready again.
+
+No software deployment work remains. Not directly verified: physical iPad/Android, actual iPadOS Safari, venue Wi-Fi/firewall, physical panel/audio/fullscreen and low-power/lock behavior, or audiences beyond six. Software samples on one Mac are not physical frame timing guarantees. Source has no sound. The free public EMQX broker has no private topic ACL or availability guarantee; signatures stop unauthorized control but not denial of service or spoofed presence. Rehearse with all actual devices and retain a local backup clip.
+
+## Implementation chronology (first failures preserved)
 
 ## Checkpoint 1 — implementation
 
