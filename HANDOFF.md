@@ -23,3 +23,12 @@ Updated: 2026-11-02 (Asia/Seoul). Implementation complete; deployment and deploy
 - Fixed preload so it never changes a running timeline.
 - Workflow deploys the feature branch directly (no main push/merge) with explicit public files only. Pages source now GitHub Actions.
 - Next: commit reviewed feature files and push, inspect deployment, then deployed Chrome + WebKit, end/reload/network loss/auth rejection/responsive tests.
+
+## Checkpoint 2 — first deployment / deployed QA
+
+- Feature commit `1786f1eb90cb00833f436033443a463af6750970` pushed. First attempt of run 41340209488 rejected by github-pages environment's main-only branch rule. Added exact feature branch to allowed branches (no secrets in this environment; kept main and other protections). Re-ran failed job only; attempt 2 succeeded. Audience/admin/video reachable.
+- Published video downloaded back from Pages: SHA-256 `bf15c8c59c43dfffed460fbe648d758c84d70ab98076f721182fa1be40930915` matches local upload exactly.
+- Deployed Chrome 156.0.8078.74 + Playwright WebKit 26.6: full video download and readiness, common-clock restart x3, pause/resume, preload while playing, natural end passed. Software currentTime spreads 8.39 ms, 7.73 ms, 25.40 ms; MQTT clock RTT 564–572 ms; play invocation residuals 1–5 ms. Same Mac/network; not physical panel measurements.
+- First deployed QA **failed** at offline detection: Playwright setOffline left the already-established WebSocket connected; conn stayed Live connection for 20 seconds. First failure and traces retained `/private/tmp/ppck-deployed-run1`.
+- Fix: connection.mjs now explicitly ends MQTT on the browser offline event and reconnects on online, and bounds publish acknowledgement waits at 10 seconds. Also fixed a retry-button visibility edge case after presenter-triggered reloading.
+- Next: redeploy runtime fixes, rerun affected deployed tests; finish reload/fullscreen/responsive verification; final handoff.

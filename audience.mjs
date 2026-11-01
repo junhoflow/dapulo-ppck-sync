@@ -32,7 +32,7 @@ function ping() {
 }
 async function loadVideo() {
   if (loading || loaded) return;
-  loading = true; error = ''; phase = 'loading'; el('retry').hidden = true;
+  loading = true; error = ''; phase = 'loading'; el('retry').hidden = true; el('ready').hidden = false;
   el('ready').disabled = true; el('ready').textContent = 'Loading video…';
   const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 120000);
   try {
