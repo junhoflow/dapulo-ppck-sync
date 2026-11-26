@@ -5,6 +5,17 @@ const fullButton = document.getElementById('full');
 const closeExpanded = document.getElementById('leave-expanded');
 export const isIPad = /iPad/.test(navigator.userAgent)
   || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// Only the right-hand app frame may request this presentation's UI context.
+window.addEventListener('message', event => {
+  if (event.origin !== 'https://dapulo.com' || event.source !== homepage?.contentWindow ||
+    event.data?.type !== 'dapulo:presentation-context-request' ||
+    typeof event.data.nonce !== 'string' || event.data.nonce.length > 80) return;
+  event.source.postMessage({
+    type: 'dapulo:presentation-context-reply',
+    nonce: event.data.nonce,
+    url: window.location.href,
+  }, event.origin);
+});
 let exitingNativeFullscreen = false;
 function setExpanded(expanded) {
   if (expanded && !closeExpanded) return; // Older cached HTML can still display the inline split.
