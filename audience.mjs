@@ -1,4 +1,4 @@
-import { showHomepage, hideHomepage, isIPad, toggleExpandedHomepage } from './homepage-panel.mjs?v=20261102-en10';
+import { showHomepage, hideHomepage, togglePresentationFullscreen } from './homepage-panel.mjs?v=20261127-tour-fullscreen';
 import { config } from './config.mjs';
 import { connect, publish } from './connection.mjs';
 import { topic, verify, validState, positionAt, clockSample, now } from './protocol.mjs';
@@ -104,17 +104,7 @@ el('sound').onclick = () => {
   el('sound').setAttribute('aria-pressed', String(muted)); el('sound').textContent = muted ? 'Sound off' : 'Sound on';
   video.muted = muted; report();
 };
-el('full').onclick = async () => {
-  if (isIPad && el('presentation').classList.contains('home-open')) { toggleExpandedHomepage(); return; }
-  try {
-    const screen = el('presentation');
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else if (screen.requestFullscreen) await screen.requestFullscreen();
-    else if (screen.webkitRequestFullscreen) screen.webkitRequestFullscreen();
-    else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-    else status('Rotate your tablet for a larger view.');
-  } catch { status('Full screen unavailable · Rotate your tablet for a larger view'); }
-};
+el('full').onclick = () => togglePresentationFullscreen(video, status);
 function finish() {
   showHomepage({ nativeVideoFullscreen: video.webkitDisplayingFullscreen === true });
   // Older Safari's native video fullscreen cannot display HTML siblings. Return inline for the website panel.
